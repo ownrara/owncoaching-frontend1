@@ -2,18 +2,22 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 16px;
 }
 
 .weekBtn {
-  background: #ffffff;
-  border: 1px solid #e6e8ee;
-  border-radius: 8px;
-  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
   cursor: pointer;
+  font-weight: 600;
+}
+
+.weekBtn:hover {
+  background: #f7f9fc;
 }
 
 .weekBtnActive {
-  border-color: #3a5bff;
-  font-weight: 700;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(58, 91, 255, 0.12);
 }

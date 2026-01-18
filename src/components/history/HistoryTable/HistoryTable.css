@@ -1,9 +1,9 @@
 .historyTableWrap {
   width: 100%;
   overflow-x: auto;
-  background: #ffffff;
-  border: 1px solid #e6e8ee;
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
 }
 
 .historyTable {
@@ -27,7 +27,7 @@
 
 .emptyCell {
   padding: 18px 12px;
-  color: #666;
+  color: var(--muted);
 }
 
 .notesCell {

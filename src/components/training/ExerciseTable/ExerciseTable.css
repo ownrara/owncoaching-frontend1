@@ -6,9 +6,9 @@
 .exerciseTable {
   width: 100%;
   border-collapse: collapse;
-  background: #ffffff;
-  border: 1px solid #e6e8ee;
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
   overflow: hidden;
 }
 
