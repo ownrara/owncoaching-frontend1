@@ -1,0 +1,17 @@
+.formCard {
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.formCardTitle {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+.formCardBody {
+  display: grid;
+  gap: 12px;
+}
