@@ -1,0 +1,14 @@
+.clientLayout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.clientMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.clientContent {
+  padding: 24px;
+}
