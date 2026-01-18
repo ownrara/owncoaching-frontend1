@@ -1,0 +1,18 @@
+.btnBase {
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.btnPrimary {
+  background: #3a5bff;
+  color: #ffffff;
+}
+
+.btnSecondary {
+  background: transparent;
+  color: #222;
+  border-color: #ccc;
+}
