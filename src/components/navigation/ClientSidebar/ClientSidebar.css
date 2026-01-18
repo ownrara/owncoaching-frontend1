@@ -1,0 +1,26 @@
+.sidebar {
+  width: 240px;
+  background: #ffffff;
+  border-right: 1px solid #e6e8ee;
+  padding: 16px;
+}
+
+.sidebarBrand {
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebarLink {
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.sidebarLink:hover {
+  background: #f0f2f7;
+}

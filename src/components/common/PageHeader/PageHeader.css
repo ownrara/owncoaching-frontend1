@@ -1,0 +1,25 @@
+.pageHeader {
+  margin-bottom: 16px;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 28px;
+}
+
+.pageSubtitle {
+  margin: 6px 0 0 0;
+  color: #555;
+}
+
+.pageDivider {
+  margin-top: 16px;
+  border: none;
+  border-top: 1px solid #e6e8ee;
+}
