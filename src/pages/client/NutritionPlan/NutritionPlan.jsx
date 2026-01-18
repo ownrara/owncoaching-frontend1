@@ -62,31 +62,37 @@ function NutritionPlan() {
         subtitle="Your personalized meals and daily macro goals"
       />
 
-      <div className="nutritionTopRow">
-        <div className="nutritionControl">
-          <label className="nutritionLabel">Plan</label>
-          <PlanSelector
-            plans={plans}
-            selectedPlanId={selectedPlanId}
-            onChange={handlePlanChange}
-          />
-        </div>
+      {/* Controls */}
+      <div className="section card">
+        <div className="nutritionTopRow">
+          <div className="nutritionControl">
+            <label className="nutritionLabel">Plan</label>
+            <PlanSelector
+              plans={plans}
+              selectedPlanId={selectedPlanId}
+              onChange={handlePlanChange}
+            />
+          </div>
 
-        <div className="nutritionControl">
-          <label className="nutritionLabel">Day</label>
-          <DaySelector
-            days={selectedPlan.days}
-            selectedDay={selectedDay}
-            onChange={setSelectedDay}
-          />
+          <div className="nutritionControl">
+            <label className="nutritionLabel">Day</label>
+            <DaySelector
+              days={selectedPlan.days}
+              selectedDay={selectedDay}
+              onChange={setSelectedDay}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="nutritionGrid">
+      {/* Content */}
+      <div className="section nutritionGrid">
         <div className="nutritionLeft">
-          <MacroSummary goals={selectedPlan.dailyGoals} />
+          <div className="card">
+            <MacroSummary goals={selectedPlan.dailyGoals} />
+          </div>
 
-          <div className="nutritionTotals">
+          <div className="card nutritionTotals">
             <h4>Planned Totals (Day)</h4>
             <ul>
               <li>
@@ -107,9 +113,15 @@ function NutritionPlan() {
 
         <div className="nutritionRight">
           {dayData ? (
-            dayData.meals.map((meal) => <MealCard key={meal.mealName} meal={meal} />)
+            dayData.meals.map((meal) => (
+              <div key={meal.mealName} className="card">
+                <MealCard meal={meal} />
+              </div>
+            ))
           ) : (
-            <p>No meals found for this day.</p>
+            <div className="card" style={{ padding: "16px" }}>
+              No meals found for this day.
+            </div>
           )}
         </div>
       </div>

@@ -43,7 +43,10 @@ function ProgressHistory() {
     const count = filtered.length;
     if (count === 0) return { count: 0, avgWeight: null };
 
-    const totalWeight = filtered.reduce((sum, c) => sum + Number(c.weight || 0), 0);
+    const totalWeight = filtered.reduce(
+      (sum, c) => sum + Number(c.weight || 0),
+      0
+    );
     const avgWeight = totalWeight / count;
 
     return { count, avgWeight: Math.round(avgWeight * 10) / 10 };
@@ -61,33 +64,44 @@ function ProgressHistory() {
         subtitle="Track your weekly check-ins over time"
       />
 
-      <div className="progressLayout">
-        <div className="progressLeft">
-          <HistoryFilters
-            filters={filters}
-            onChangeFilters={setFilters}
-            onReset={resetFilters}
-          />
-
-          <FormCard title="Summary (Filtered)">
-            <div className="summaryRow">
-              <div className="summaryItem">
-                <div className="summaryLabel">Check-ins</div>
-                <div className="summaryValue">{summary.count}</div>
-              </div>
-
-              <div className="summaryItem">
-                <div className="summaryLabel">Avg Weight</div>
-                <div className="summaryValue">
-                  {formatNumber(summary.avgWeight, " kg")}
-                </div>
-              </div>
+      <div className="section">
+        <div className="progressLayout">
+          <div className="progressLeft">
+            {/* Filters already look like a card, so no extra .card wrapper */}
+            <div className="section">
+              <HistoryFilters
+                filters={filters}
+                onChangeFilters={setFilters}
+                onReset={resetFilters}
+              />
             </div>
-          </FormCard>
-        </div>
 
-        <div className="progressRight">
-          <HistoryTable rows={filtered} />
+            {/* FormCard already is a card */}
+            <div className="section">
+              <FormCard title="Summary (Filtered)">
+                <div className="summaryRow">
+                  <div className="summaryItem">
+                    <div className="summaryLabel">Check-ins</div>
+                    <div className="summaryValue">{summary.count}</div>
+                  </div>
+
+                  <div className="summaryItem">
+                    <div className="summaryLabel">Avg Weight</div>
+                    <div className="summaryValue">
+                      {formatNumber(summary.avgWeight, " kg")}
+                    </div>
+                  </div>
+                </div>
+              </FormCard>
+            </div>
+          </div>
+
+          <div className="progressRight">
+            <div className="section">
+              {/* HistoryTable already is a surface; keep it clean */}
+              <HistoryTable rows={filtered} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

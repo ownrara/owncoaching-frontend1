@@ -18,35 +18,40 @@ function ClientDashboard() {
       />
 
       {/* Overview cards */}
-      <div className="dashboardGrid3">
-        {mockClientDashboard.overview.map((item) => (
-          <StatCard
-            key={item.id}
-            label={item.label}
-            value={item.value}
-            subtext={item.subtext}
-          />
-        ))}
+      <div className="section">
+        <div className="dashboardGrid3">
+          {mockClientDashboard.overview.map((item) => (
+            <div key={item.id} className="card">
+              <StatCard
+                label={item.label}
+                value={item.value}
+                subtext={item.subtext}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Quick actions */}
-      <div className="dashboardSection">
+      <div className="section">
         <h3 className="sectionTitle">Quick Actions</h3>
 
         <div className="dashboardGrid2">
           {mockClientDashboard.quickActions.map((action) => (
-            <ActionCard
-              key={action.id}
-              label={action.label}
-              description={action.description}
-              to={action.to}
-            />
+            <div key={action.id} className="card">
+              <ActionCard
+                label={action.label}
+                description={action.description}
+                to={action.to}
+              />
+            </div>
           ))}
         </div>
       </div>
 
       {/* Recent check-in & coach update */}
-      <div className="dashboardSection">
+      <div className="section">
+        {/* SectionCard already looks like a card, so no extra .card wrapper */}
         <SectionCard
           title="Recent Check-In & Coach Update"
           rightText="View Progress History"
@@ -54,9 +59,7 @@ function ClientDashboard() {
         >
           <div className="recentRow">
             <div>
-              <div className="recentDate">
-                {mockClientDashboard.recent.date}
-              </div>
+              <div className="recentDate">{mockClientDashboard.recent.date}</div>
 
               <ul className="recentStats">
                 {mockClientDashboard.recent.stats.map((stat) => (
@@ -69,9 +72,7 @@ function ClientDashboard() {
 
             <div>
               <div className="recentLabel">Coach Notes</div>
-              <p className="recentText">
-                {mockClientDashboard.recent.coachUpdate}
-              </p>
+              <p className="recentText">{mockClientDashboard.recent.coachUpdate}</p>
             </div>
           </div>
         </SectionCard>

@@ -20,8 +20,9 @@ function TrainingPlan() {
         subtitle="Your personalized workout routine"
       />
 
-      <div className="trainingTopBar">
-        <div className="trainingPlanMeta">
+      {/* Plan meta */}
+      <div className="section">
+        <div className="trainingPlanMeta card">
           <div className="trainingPlanName">{mockTrainingPlan.planName}</div>
           <div className="trainingPlanSub">
             Duration: {mockTrainingPlan.durationWeeks} weeks
@@ -30,17 +31,23 @@ function TrainingPlan() {
         </div>
       </div>
 
-      <WeekSelector
-        weeks={mockTrainingPlan.weeks}
-        selectedWeekNumber={selectedWeek}
-        onSelectWeek={setSelectedWeek}
-      />
+      {/* Week selector */}
+      <div className="section card">
+        <WeekSelector
+          weeks={mockTrainingPlan.weeks}
+          selectedWeekNumber={selectedWeek}
+          onSelectWeek={setSelectedWeek}
+        />
+      </div>
 
-      {weekData ? (
-        <DayAccordion days={weekData.days} />
-      ) : (
-        <div className="trainingEmpty">No data for this week.</div>
-      )}
+      {/* Days */}
+      <div className="section">
+        {weekData ? (
+          <DayAccordion days={weekData.days} />
+        ) : (
+          <div className="trainingEmpty card">No data for this week.</div>
+        )}
+      </div>
     </div>
   );
 }
