@@ -1,0 +1,29 @@
+.trainingTopBar {
+  margin-bottom: 12px;
+}
+
+.trainingPlanMeta {
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.trainingPlanName {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.trainingPlanSub {
+  margin-top: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.trainingEmpty {
+  padding: 14px 16px;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #666;
+}
