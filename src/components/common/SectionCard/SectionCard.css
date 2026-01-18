@@ -1,0 +1,30 @@
+.sectionCard {
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.sectionLink {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #3a5bff;
+  font-size: 14px;
+}
+
+.sectionBody {
+  margin-top: 4px;
+}

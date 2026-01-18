@@ -1,0 +1,30 @@
+.actionCard {
+  display: block;
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.actionCard:hover {
+  background: #f7f9fc;
+}
+
+.actionTitle {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.actionDesc {
+  font-size: 14px;
+  color: #666;
+}
+
+.actionArrow {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  font-size: 18px;
+  color: #666;
+}
