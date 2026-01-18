@@ -10,8 +10,8 @@ function ClientLayout() {
 
       <div className="clientMain">
         <Topbar />
-        <main className="clientContent">
-          <Outlet />
+         <main className="clientContent page">
+        <Outlet />
         </main>
       </div>
     </div>
