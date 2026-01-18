@@ -1,0 +1,19 @@
+.weekSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.weekBtn {
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.weekBtnActive {
+  border-color: #3a5bff;
+  font-weight: 700;
+}
