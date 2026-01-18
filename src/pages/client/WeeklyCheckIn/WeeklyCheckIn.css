@@ -1,0 +1,58 @@
+.checkInGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.textArea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+.submitBtn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #3a5bff;
+  color: #fff;
+  font-weight: 700;
+}
+
+.historyList {
+  display: grid;
+  gap: 10px;
+}
+
+.historyItem {
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fff;
+}
+
+.historyTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyMeta {
+  margin-top: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.historyNotes {
+  margin-top: 8px;
+  color: #444;
+}
+
+@media (max-width: 900px) {
+  .checkInGrid2 {
+    grid-template-columns: 1fr;
+  }
+}
