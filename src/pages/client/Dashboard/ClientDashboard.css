@@ -1,0 +1,61 @@
+.dashboardGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.dashboardGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.dashboardSection {
+  margin-top: 20px;
+}
+
+.sectionTitle {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.recentRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.recentDate {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.recentStats {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.recentLabel {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.recentText {
+  margin: 0;
+  color: #444;
+}
+
+/* Responsive (course-level, simple) */
+@media (max-width: 900px) {
+  .dashboardGrid3 {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardGrid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .recentRow {
+    grid-template-columns: 1fr;
+  }
+}
