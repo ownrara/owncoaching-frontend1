@@ -3,7 +3,7 @@ import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import FormCard from "../../../components/form/FormCard/FormCard";
 import HistoryFilters from "../../../components/history/HistoryFilters/HistoryFilters";
 import HistoryTable from "../../../components/history/HistoryTable/HistoryTable";
-import mockCheckIns from "../../../data/mockCheckIns";
+import { getCheckIns } from "../../../data/checkInsStore";
 import { formatNumber } from "../../../utils/formatters";
 import "./ProgressHistory.css";
 
@@ -17,8 +17,11 @@ const DEFAULT_FILTERS = {
 function ProgressHistory() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
+  // course-level "store read" (one-time init)
+  const [checkIns] = useState(() => getCheckIns());
+
   const filtered = useMemo(() => {
-    return mockCheckIns.filter((c) => {
+    return checkIns.filter((c) => {
       // Energy filter
       if (filters.energy !== "All" && c.energy !== filters.energy) return false;
 
@@ -37,7 +40,7 @@ function ProgressHistory() {
 
       return true;
     });
-  }, [filters]);
+  }, [filters, checkIns]);
 
   const summary = useMemo(() => {
     const count = filtered.length;
@@ -67,7 +70,6 @@ function ProgressHistory() {
       <div className="section">
         <div className="progressLayout">
           <div className="progressLeft">
-            {/* Filters already look like a card, so no extra .card wrapper */}
             <div className="section">
               <HistoryFilters
                 filters={filters}
@@ -76,7 +78,6 @@ function ProgressHistory() {
               />
             </div>
 
-            {/* FormCard already is a card */}
             <div className="section">
               <FormCard title="Summary (Filtered)">
                 <div className="summaryRow">
@@ -98,7 +99,6 @@ function ProgressHistory() {
 
           <div className="progressRight">
             <div className="section">
-              {/* HistoryTable already is a surface; keep it clean */}
               <HistoryTable rows={filtered} />
             </div>
           </div>
