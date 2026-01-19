@@ -1,59 +1,137 @@
 import { useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
-import CheckInsTable from "../../../components/coach/CheckInsTable/CheckInsTable";
+import CoachNotesBox from "../../../components/coach/CoachNotesBox/CoachNotesBox";
 import mockCheckIns from "../../../data/mockCheckIns";
 import mockClients from "../../../data/mockClients";
+import "./CoachCheckInDetails.css";
 
-function CoachCheckInsInbox() {
-  const [status, setStatus] = useState("Pending"); // "Pending" | "Reviewed" | "All"
+function CoachCheckInDetails() {
+  const { checkInId } = useParams();
 
-  const rows = useMemo(() => {
-    const filtered =
-      status === "All"
-        ? mockCheckIns
-        : mockCheckIns.filter((c) => c.status === status);
+  // course-level local copy (backend later)
+  const [checkIns, setCheckIns] = useState(mockCheckIns);
 
-    return filtered.map((c) => {
-      const client = mockClients.find((x) => x.id === c.clientId);
-      return {
-        id: c.id,
-        clientName: client?.name || c.clientId,
-        date: c.date,
-        status: c.status,
-      };
-    });
-  }, [status]);
+  const checkIn = useMemo(() => {
+    return checkIns.find((c) => c.id === checkInId) || null;
+  }, [checkIns, checkInId]);
+
+  const client = useMemo(() => {
+    if (!checkIn) return null;
+    return mockClients.find((x) => x.id === checkIn.clientId) || null;
+  }, [checkIn]);
+
+  const [draftNotes, setDraftNotes] = useState("");
+
+  // when checkIn loads/changes, sync textarea
+  useMemo(() => {
+    if (checkIn) setDraftNotes(checkIn.coachNotes || "");
+  }, [checkInId]); // keep course-simple
+
+  function saveNotes() {
+    if (!checkIn) return;
+
+    setCheckIns((prev) =>
+      prev.map((c) =>
+        c.id === checkIn.id ? { ...c, coachNotes: draftNotes } : c
+      )
+    );
+  }
+
+  function markReviewed() {
+    if (!checkIn) return;
+
+    setCheckIns((prev) =>
+      prev.map((c) =>
+        c.id === checkIn.id
+          ? { ...c, status: "Reviewed", coachNotes: draftNotes }
+          : c
+      )
+    );
+  }
+
+  if (!checkIn) {
+    return (
+      <div>
+        <PageHeader
+          breadcrumb="Coach / Check-Ins / Details"
+          title="Check-In Details"
+          subtitle={`Not found: ${checkInId}`}
+        />
+
+        <div className="card" style={{ padding: 16 }}>
+          This check-in does not exist.{" "}
+          <Link to="/coach/check-ins">Back to inbox</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <PageHeader
-        breadcrumb="Coach / Check-Ins"
-        title="Check-Ins Inbox"
-        subtitle="Review client check-ins and mark them as reviewed."
+        breadcrumb="Coach / Check-Ins / Details"
+        title="Check-In Details"
+        subtitle={`${client?.name || checkIn.clientId} • ${checkIn.date}`}
       />
 
-      {/* Simple filter (course-level) */}
-      <div className="section" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <button className="btn" onClick={() => setStatus("Pending")}>
-          Pending
-        </button>
-        <button className="btn" onClick={() => setStatus("Reviewed")}>
-          Reviewed
-        </button>
-        <button className="btn" onClick={() => setStatus("All")}>
-          All
-        </button>
-      </div>
+      <div className="checkInDetailsGrid">
+        <div className="checkInLeft">
+          <div className="card detailsCard">
+            <div className="detailsTitle">Client Submission</div>
 
-      <div className="section">
-        <CheckInsTable
-          rows={rows}
-          title={status === "All" ? "All Check-Ins" : `${status} Check-Ins`}
-          emptyText="No check-ins match this filter."
-        />
+            <div className="detailsRow">
+              <div className="detailsLabel">Client</div>
+              <div className="detailsValue">{client?.name || checkIn.clientId}</div>
+            </div>
+
+            <div className="detailsRow">
+              <div className="detailsLabel">Date</div>
+              <div className="detailsValue">{checkIn.date}</div>
+            </div>
+
+            <div className="detailsRow">
+              <div className="detailsLabel">Weight</div>
+              <div className="detailsValue">{checkIn.weight} kg</div>
+            </div>
+
+            <div className="detailsRow">
+              <div className="detailsLabel">Energy</div>
+              <div className="detailsValue">{checkIn.energy}</div>
+            </div>
+
+            <div className="detailsRow">
+              <div className="detailsLabel">Adherence</div>
+              <div className="detailsValue">
+                {checkIn.adherence ?? "-"}%
+              </div>
+            </div>
+
+            <div className="detailsNotes">
+              <div className="detailsLabel">Client Notes</div>
+              <div className="detailsNotesBox">{checkIn.notes || "-"}</div>
+            </div>
+          </div>
+
+          <div className="backRow">
+            <Link className="backLink" to="/coach/check-ins">
+              ← Back to inbox
+            </Link>
+          </div>
+        </div>
+
+        <div className="checkInRight">
+          <CoachNotesBox
+            value={draftNotes}
+            onChange={setDraftNotes}
+            onSave={saveNotes}
+            onMarkReviewed={markReviewed}
+            status={checkIn.status}
+          />
+        </div>
       </div>
     </div>
   );
 }
 
-export default CoachCheckInsInbox;
+export default CoachCheckInDetails;
