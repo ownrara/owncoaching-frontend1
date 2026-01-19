@@ -1,16 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import CoachNotesBox from "../../../components/coach/CoachNotesBox/CoachNotesBox";
-import mockCheckIns from "../../../data/mockCheckIns";
 import mockClients from "../../../data/mockClients";
+import { getCheckIns, saveCheckIns } from "../../../data/checkInsStore";
 import "./CoachCheckInDetails.css";
 
 function CoachCheckInDetails() {
   const { checkInId } = useParams();
 
-  // course-level local copy (backend later)
-  const [checkIns, setCheckIns] = useState(mockCheckIns);
+  const [checkIns, setCheckIns] = useState(() => getCheckIns());
 
   const checkIn = useMemo(() => {
     return checkIns.find((c) => c.id === checkInId) || null;
@@ -23,31 +22,35 @@ function CoachCheckInDetails() {
 
   const [draftNotes, setDraftNotes] = useState("");
 
-  // when checkIn loads/changes, sync textarea
-  useMemo(() => {
-    if (checkIn) setDraftNotes(checkIn.coachNotes || "");
-  }, [checkInId]); // keep course-simple
+  useEffect(() => {
+    setDraftNotes(checkIn?.coachNotes || "");
+  }, [checkInId, checkIn?.coachNotes]);
+
+  function persist(next) {
+    setCheckIns(next);
+    saveCheckIns(next);
+  }
 
   function saveNotes() {
     if (!checkIn) return;
 
-    setCheckIns((prev) =>
-      prev.map((c) =>
-        c.id === checkIn.id ? { ...c, coachNotes: draftNotes } : c
-      )
+    const next = checkIns.map((c) =>
+      c.id === checkIn.id ? { ...c, coachNotes: draftNotes } : c
     );
+
+    persist(next);
   }
 
   function markReviewed() {
     if (!checkIn) return;
 
-    setCheckIns((prev) =>
-      prev.map((c) =>
-        c.id === checkIn.id
-          ? { ...c, status: "Reviewed", coachNotes: draftNotes }
-          : c
-      )
+    const next = checkIns.map((c) =>
+      c.id === checkIn.id
+        ? { ...c, status: "Reviewed", coachNotes: draftNotes }
+        : c
     );
+
+    persist(next);
   }
 
   if (!checkIn) {
@@ -102,9 +105,7 @@ function CoachCheckInDetails() {
 
             <div className="detailsRow">
               <div className="detailsLabel">Adherence</div>
-              <div className="detailsValue">
-                {checkIn.adherence ?? "-"}%
-              </div>
+              <div className="detailsValue">{checkIn.adherence ?? "-"}%</div>
             </div>
 
             <div className="detailsNotes">

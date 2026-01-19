@@ -1,12 +1,6 @@
 import "./CoachNotesBox.css";
 
-function CoachNotesBox({
-  value,
-  onChange,
-  onSave,
-  onMarkReviewed,
-  status,
-}) {
+function CoachNotesBox({ value, onChange, onSave, onMarkReviewed, status }) {
   const isReviewed = status === "Reviewed";
 
   return (
@@ -15,7 +9,7 @@ function CoachNotesBox({
         <div>
           <div className="coachNotesTitle">Coach Notes</div>
           <div className="coachNotesSub">
-            Visible to the client in Progress History only.
+            Visible to the client inside Progress History.
           </div>
         </div>
 
@@ -28,7 +22,7 @@ function CoachNotesBox({
         className="coachNotesArea"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Write feedback, adjustments, and next steps..."
+        placeholder="Write feedback and next steps..."
         rows={7}
       />
 
@@ -42,7 +36,6 @@ function CoachNotesBox({
           className="btnPrimary"
           onClick={onMarkReviewed}
           disabled={isReviewed}
-          title={isReviewed ? "Already reviewed" : "Mark this check-in as reviewed"}
         >
           Mark Reviewed
         </button>
