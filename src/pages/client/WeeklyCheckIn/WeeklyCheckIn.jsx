@@ -2,164 +2,131 @@ import { useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import FormCard from "../../../components/form/FormCard/FormCard";
 import TextInput from "../../../components/form/TextInput/TextInput";
-import SelectInput from "../../../components/form/SelectInput/SelectInput";
-import mockCheckIns from "../../../data/mockCheckIns";
+import UnitToggle from "../../../components/checkin/UnitToggle/UnitToggle";
+import MeasurementsGrid from "../../../components/checkin/MeasurementsGrid/MeasurementsGrid";
+import PhotoUploadBox from "../../../components/checkin/PhotoUploadBox/PhotoUploadBox";
+import mockWeeklyCheckIn from "../../../data/mockWeeklyCheckIn";
 import "./WeeklyCheckIn.css";
 
 function WeeklyCheckIn() {
-  const [checkIns, setCheckIns] = useState(mockCheckIns);
+  const [weightUnit, setWeightUnit] = useState(mockWeeklyCheckIn.weightUnit);
+  const [measureUnit, setMeasureUnit] = useState(mockWeeklyCheckIn.measureUnit);
 
-  const [form, setForm] = useState({
-    date: "",
-    weight: "",
-    waist: "",
-    sleepHours: "",
-    energy: "Good",
-    adherence: "",
-    notes: "",
-  });
+  const [weight, setWeight] = useState(mockWeeklyCheckIn.current.weight);
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
+  const [body, setBody] = useState(mockWeeklyCheckIn.body);
+
+  const [photos, setPhotos] = useState(mockWeeklyCheckIn.photos);
+
+  const [complianceNotes, setComplianceNotes] = useState(mockWeeklyCheckIn.complianceNotes);
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (!form.date || !form.weight) {
-      alert("Please fill in at least Date and Weight.");
+    if (!weight) {
+      alert("Please enter your weight.");
       return;
     }
 
-    const newCheckIn = {
-      id: `c${checkIns.length + 1}`,
-      date: form.date,
-      weight: Number(form.weight),
-      waist: form.waist ? Number(form.waist) : null,
-      sleepHours: form.sleepHours ? Number(form.sleepHours) : null,
-      energy: form.energy,
-      adherence: form.adherence ? Number(form.adherence) : null,
-      notes: form.notes,
-    };
-
-    setCheckIns((prev) => [newCheckIn, ...prev]);
-
-    setForm({
-      date: "",
-      weight: "",
-      waist: "",
-      sleepHours: "",
-      energy: "Good",
-      adherence: "",
-      notes: "",
-    });
+    // Mock submit only
+    alert("Weekly check-in submitted (mock).");
   }
 
   return (
     <div>
       <PageHeader
-        breadcrumb="Client / Weekly Check-In"
+        breadcrumb="Dashboard / Weekly Check-In"
         title="Weekly Check-In"
         subtitle="Submit your weekly progress update"
       />
 
-      <div className="section">
-        <form onSubmit={handleSubmit}>
-          <FormCard title="Check-In Details">
-            <div className="checkInGrid2">
-              <TextInput
-                label="Date"
-                name="date"
-                type="date"
-                value={form.date}
-                onChange={handleChange}
-              />
-
-              <TextInput
-                label="Weight (kg)"
-                name="weight"
-                type="number"
-                value={form.weight}
-                onChange={handleChange}
-                placeholder="e.g. 79.2"
-              />
-
-              <TextInput
-                label="Waist (cm)"
-                name="waist"
-                type="number"
-                value={form.waist}
-                onChange={handleChange}
-                placeholder="e.g. 82"
-              />
-
-              <TextInput
-                label="Sleep Hours"
-                name="sleepHours"
-                type="number"
-                value={form.sleepHours}
-                onChange={handleChange}
-                placeholder="e.g. 7"
-              />
-
-              <SelectInput
-                label="Energy"
-                name="energy"
-                value={form.energy}
-                onChange={handleChange}
-                options={["Great", "Good", "Average", "Low"]}
-              />
-
-              <TextInput
-                label="Adherence (%)"
-                name="adherence"
-                type="number"
-                value={form.adherence}
-                onChange={handleChange}
-                placeholder="0 - 100"
-              />
-            </div>
-
-            <div>
-              <label className="formLabel">Notes</label>
-              <textarea
-                className="textArea"
-                name="notes"
-                value={form.notes}
-                onChange={handleChange}
-                placeholder="Anything your coach should know..."
-                rows={4}
-              />
-            </div>
-
-            <button className="submitBtn" type="submit">
-              Submit Check-In
-            </button>
-          </FormCard>
-        </form>
-      </div>
-
-      <div className="section">
-        <FormCard title="Previous Check-Ins (Local Mock)">
-          <div className="historyList">
-            {checkIns.map((c) => (
-              <div key={c.id} className="historyItem">
-                <div className="historyTop">
-                  <strong>{c.date}</strong>
-                  <span>{c.weight} kg</span>
+      <form onSubmit={handleSubmit}>
+        <div className="weeklyLayout">
+          {/* LEFT COLUMN */}
+          <div className="weeklyLeft">
+            <div className="weeklySectionTitle">1. Current Measurements</div>
+            <FormCard>
+              <div className="weightRow">
+                <div className="weightInput">
+                  <TextInput
+                    label="Weight"
+                    name="weight"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    placeholder=""
+                  />
                 </div>
 
-                <div className="historyMeta">
-                  Energy: {c.energy} • Adherence: {c.adherence ?? "-"}%
+                <div className="weightToggle">
+                  <UnitToggle
+                    value={weightUnit}
+                    options={[
+                      { value: "lbs", label: "lbs" },
+                      { value: "kg", label: "kg" },
+                    ]}
+                    onChange={setWeightUnit}
+                  />
                 </div>
-
-                {c.notes ? <div className="historyNotes">{c.notes}</div> : null}
               </div>
-            ))}
+            </FormCard>
+
+            <div className="weeklySectionTitle">2. Body Measurements</div>
+            <FormCard>
+              <MeasurementsGrid
+                unit={measureUnit}
+                onUnitChange={setMeasureUnit}
+                values={body}
+                onValueChange={setBody}
+              />
+            </FormCard>
           </div>
-        </FormCard>
-      </div>
+
+          {/* RIGHT COLUMN */}
+          <div className="weeklyRight">
+            <div className="weeklySectionTitle">3. Progress Photos</div>
+            <FormCard>
+              <div className="photosGrid">
+                <PhotoUploadBox
+                  label="Front"
+                  value={photos.front}
+                  onChange={(file) => setPhotos((p) => ({ ...p, front: file }))}
+                />
+                <PhotoUploadBox
+                  label="Side"
+                  value={photos.side}
+                  onChange={(file) => setPhotos((p) => ({ ...p, side: file }))}
+                />
+                <PhotoUploadBox
+                  label="Back"
+                  value={photos.back}
+                  onChange={(file) => setPhotos((p) => ({ ...p, back: file }))}
+                />
+              </div>
+            </FormCard>
+
+            <div className="weeklySectionTitle">4. Compliance</div>
+            <FormCard>
+              <div className="compliancePrompt">
+                How compliant were you with your diet & training plan?
+              </div>
+
+              <textarea
+                className="weeklyTextArea"
+                value={complianceNotes}
+                onChange={(e) => setComplianceNotes(e.target.value)}
+                placeholder="Any other comments or information you'd like to share..."
+                rows={6}
+              />
+            </FormCard>
+
+            <div className="submitRow">
+              <button className="weeklySubmitBtn" type="submit">
+                Submit Check-In
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }
