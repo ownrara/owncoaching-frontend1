@@ -1,91 +1,87 @@
-.nutritionLegacyLayout {
+/* Makes the page align like the old design (not centered tiny) */
+.nutritionPage {
+  width: 100%;
+}
+
+/* Main 2-column layout like old screenshot */
+.nutritionGrid {
   display: grid;
   grid-template-columns: 1fr 420px;
   gap: 18px;
   align-items: start;
+  margin-top: 10px;
 }
 
-.nutritionLegacyLeft {
-  display: grid;
+/* Left column should be wide */
+.nutritionLeft {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
 }
 
-.nutritionLegacyRight {
-  display: grid;
-  gap: 14px;
+/* Right column fixed width card */
+.nutritionRight {
+  min-width: 0;
 }
 
-.nutritionLegacyCard {
+/* Top controls card */
+.nutritionTopCard {
   padding: 14px;
 }
 
-.nutritionLegacyControlsRow {
+.nutritionControlsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 12px;
+  align-items: end;
 }
 
-.nutritionLegacyControl {
-  display: grid;
-  gap: 8px;
-}
-
-.nutritionLegacyLabel {
+.nutritionControlLabel {
   font-size: 13px;
+  font-weight: 800;
   color: var(--muted);
-  font-weight: 700;
+  margin-bottom: 6px;
 }
 
-.nutritionLegacySelect {
-  width: 100%;
-  height: 40px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 0 12px;
-  background: #fff;
+.nutritionInfoStrip {
+  margin-top: 12px;
 }
 
-/* Meals placeholder */
-.nutritionLegacyMealsPlaceholder {
-  display: grid;
-  gap: 10px;
+/* Coach Notes spacing */
+.nutritionSection {
+  margin-top: 0;
 }
 
-.nutritionLegacyMealRow {
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
+/* Meals card */
+.nutritionMealsCard {
+  padding: 0;
   overflow: hidden;
 }
 
-.nutritionLegacyMealHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.nutritionMealsHeader {
   padding: 12px 14px;
-  background: #dbe9ff;
+  font-weight: 900;
+  border-bottom: 1px solid var(--border);
 }
 
-.nutritionLegacyMealTitle {
-  font-weight: 800;
-  font-size: 13px;
+.nutritionMealsBody {
+  padding: 12px 14px 14px 14px;
 }
 
-.nutritionLegacyMealTime {
-  font-size: 12px;
+.nutritionEmpty {
+  padding: 10px 0;
+  font-size: 14px;
   color: var(--muted);
-  font-weight: 700;
 }
 
-.nutritionLegacyMealTablePlaceholder {
-  padding: 14px;
-  font-size: 13px;
-  color: var(--muted);
-  background: #fff;
-}
-
-/* Responsive */
+/* Responsive (stack columns) */
 @media (max-width: 1100px) {
-  .nutritionLegacyLayout {
+  .nutritionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .nutritionControlsRow {
     grid-template-columns: 1fr;
   }
 }

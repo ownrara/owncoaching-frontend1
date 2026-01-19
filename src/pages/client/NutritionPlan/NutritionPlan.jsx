@@ -1,155 +1,140 @@
 import { useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
-import mockNutritionLegacy from "../../../data/mockNutritionLegacy";
+import mockNutritionPlan from "../../../data/mockNutritionPlan";
+
+import PlanSelector from "../../../components/nutrition/PlanSelector";
+import DaySelector from "../../../components/nutrition/DaySelector";
 import InfoStrip from "../../../components/nutrition/InfoStrip/InfoStrip";
 import CoachNotesCard from "../../../components/nutrition/CoachNotesCard/CoachNotesCard";
 import MacroBreakdownCard from "../../../components/nutrition/MacroBreakdownCard/MacroBreakdownCard";
+import MealAccordion from "../../../components/nutrition/MealAccordion/MealAccordion";
+
 import "./NutritionPlan.css";
+import "../../../components/nutrition/Nutrition.css";
 
 function NutritionPlan() {
-  const plans = mockNutritionLegacy.plans;
+  const plans = mockNutritionPlan.plans;
 
-  const [selectedPlanId, setSelectedPlanId] = useState(plans[0].id);
+  const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id || "");
   const selectedPlan = useMemo(() => {
-    return plans.find((p) => p.id === selectedPlanId);
+    return plans.find((p) => p.id === selectedPlanId) || plans[0];
   }, [plans, selectedPlanId]);
 
-  const [selectedDayId, setSelectedDayId] = useState(selectedPlan.days[0].id);
+  const [selectedDay, setSelectedDay] = useState(
+    selectedPlan?.days?.[0]?.day || ""
+  );
 
-  function handlePlanChange(e) {
-    const newPlanId = e.target.value;
+  function handlePlanChange(newPlanId) {
     setSelectedPlanId(newPlanId);
 
     const newPlan = plans.find((p) => p.id === newPlanId);
-    if (newPlan && newPlan.days.length > 0) {
-      setSelectedDayId(newPlan.days[0].id);
-    }
+    if (newPlan?.days?.length) setSelectedDay(newPlan.days[0].day);
+    else setSelectedDay("");
   }
 
-  const selectedDay = useMemo(() => {
+  const dayData = useMemo(() => {
     if (!selectedPlan) return null;
-    return selectedPlan.days.find((d) => d.id === selectedDayId) || null;
-  }, [selectedPlan, selectedDayId]);
+    return selectedPlan.days.find((d) => d.day === selectedDay) || null;
+  }, [selectedPlan, selectedDay]);
 
-  const plannedTotals = useMemo(() => {
-    if (!selectedDay) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  const totals = useMemo(() => {
+    if (!dayData) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
     let calories = 0;
     let protein = 0;
     let carbs = 0;
     let fat = 0;
 
-    selectedDay.meals.forEach((meal) => {
+    dayData.meals.forEach((meal) => {
       meal.items.forEach((item) => {
-        calories += item.cals;
-        protein += item.protein;
-        carbs += item.carbs;
-        fat += item.fat;
+        calories += Number(item.calories || 0);
+        protein += Number(item.protein || 0);
+        carbs += Number(item.carbs || 0);
+        fat += Number(item.fat || 0);
       });
     });
 
     return { calories, protein, carbs, fat };
-  }, [selectedDay]);
+  }, [dayData]);
 
   const macroPercents = useMemo(() => {
-    const totalGrams =
-      plannedTotals.protein + plannedTotals.carbs + plannedTotals.fat;
-    if (!totalGrams) return { protein: 0, carbs: 0, fat: 0 };
+    const p = Number(selectedPlan?.dailyGoals?.protein || 0);
+    const c = Number(selectedPlan?.dailyGoals?.carbs || 0);
+    const f = Number(selectedPlan?.dailyGoals?.fat || 0);
+    const total = p + c + f;
+
+    if (!total) return { protein: 0, carbs: 0, fat: 0 };
 
     return {
-      protein: Math.round((plannedTotals.protein / totalGrams) * 100),
-      carbs: Math.round((plannedTotals.carbs / totalGrams) * 100),
-      fat: Math.round((plannedTotals.fat / totalGrams) * 100),
+      protein: Math.round((p / total) * 100),
+      carbs: Math.round((c / total) * 100),
+      fat: Math.round((f / total) * 100),
     };
-  }, [plannedTotals]);
-
-  function handleViewHistory() {
-    // Placeholder only (we’ll connect to a page later if you want)
-    alert("Nutrition history will be added later.");
-  }
+  }, [selectedPlan]);
 
   return (
-    <div>
+    <div className="nutritionPage">
       <PageHeader
         breadcrumb="Dashboard / My Nutrition Plan"
         title="My Nutrition Plan"
-        subtitle={`Plan: ${selectedPlan.name} | ${mockNutritionLegacy.weekLabel}`}
+        subtitle={`Plan: ${selectedPlan?.name || "-"} | Day: ${selectedDay || "-"}`}
       />
 
-      <div className="nutritionLegacyLayout">
+      <div className="nutritionGrid">
         {/* LEFT COLUMN */}
-        <div className="nutritionLegacyLeft">
-          <div className="card nutritionLegacyCard">
-            <div className="nutritionLegacyControlsRow">
-              <div className="nutritionLegacyControl">
-                <div className="nutritionLegacyLabel">Current Plan</div>
-                <select
-                  className="nutritionLegacySelect"
-                  value={selectedPlanId}
+        <div className="nutritionLeft">
+          {/* top controls card */}
+          <div className="card nutritionTopCard">
+            <div className="nutritionControlsRow">
+              <div className="nutritionControl">
+                <div className="nutritionControlLabel">Current Plan</div>
+                <PlanSelector
+                  plans={plans}
+                  selectedPlanId={selectedPlanId}
                   onChange={handlePlanChange}
-                >
-                  {plans.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
-              <div className="nutritionLegacyControl">
-                <div className="nutritionLegacyLabel">Select Day</div>
-                <select
-                  className="nutritionLegacySelect"
-                  value={selectedDayId}
-                  onChange={(e) => setSelectedDayId(e.target.value)}
-                >
-                  {selectedPlan.days.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.label}
-                    </option>
-                  ))}
-                </select>
+              <div className="nutritionControl">
+                <div className="nutritionControlLabel">Select Day</div>
+                <DaySelector
+                  days={selectedPlan?.days || []}
+                  selectedDay={selectedDay}
+                  onChange={setSelectedDay}
+                />
               </div>
             </div>
 
-            <InfoStrip
-              calories={selectedPlan.dailyGoals.calories}
-              protein={selectedPlan.dailyGoals.protein}
-              carbs={selectedPlan.dailyGoals.carbs}
-              fat={selectedPlan.dailyGoals.fat}
-            />
+            <div className="nutritionInfoStrip">
+              <InfoStrip goals={selectedPlan?.dailyGoals} />
+            </div>
           </div>
 
-          <CoachNotesCard notes={selectedPlan.coachNotes} />
+          {/* coach notes */}
+          <div className="nutritionSection">
+            <CoachNotesCard text={selectedPlan?.coachNotes || ""} />
+          </div>
 
-          <div className="card nutritionLegacyCard">
-            <div className="nutritionLegacyCardTitle">Meals</div>
+          {/* meals */}
+          <div className="card nutritionMealsCard">
+            <div className="nutritionMealsHeader">Meals</div>
 
-            <div className="nutritionLegacyMealsPlaceholder">
-              {selectedDay?.meals.map((meal, idx) => (
-                <div key={meal.id} className="nutritionLegacyMealRow">
-                  <div className="nutritionLegacyMealHeader">
-                    <div className="nutritionLegacyMealTitle">{meal.title}</div>
-                    <div className="nutritionLegacyMealTime">{meal.time}</div>
-                  </div>
-
-                  {idx === 0 ? (
-                    <div className="nutritionLegacyMealTablePlaceholder">
-                      Table preview will be rebuilt as a reusable component in Step 3.
-                    </div>
-                  ) : null}
-                </div>
-              ))}
+            <div className="nutritionMealsBody">
+              {dayData ? (
+                <MealAccordion meals={dayData.meals} />
+              ) : (
+                <div className="nutritionEmpty">No meals found for this day.</div>
+              )}
             </div>
           </div>
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="nutritionLegacyRight">
+        <div className="nutritionRight">
           <MacroBreakdownCard
-            caloriesGoal={selectedPlan.dailyGoals.calories}
+            caloriesGoal={Number(selectedPlan?.dailyGoals?.calories || 0)}
             macroPercents={macroPercents}
-            onViewHistory={handleViewHistory}
+            totals={totals}
           />
         </div>
       </div>
