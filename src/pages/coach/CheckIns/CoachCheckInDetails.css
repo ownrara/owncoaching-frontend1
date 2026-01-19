@@ -1,0 +1,65 @@
+.checkInDetailsGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr;
+  gap: 18px;
+  align-items: start;
+  margin-top: 12px;
+}
+
+.detailsCard {
+  padding: 14px;
+}
+
+.detailsTitle {
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.detailsRow {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.detailsRow:last-child {
+  border-bottom: 0;
+}
+
+.detailsLabel {
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.detailsValue {
+  font-weight: 800;
+}
+
+.detailsNotes {
+  margin-top: 12px;
+}
+
+.detailsNotesBox {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--text);
+}
+
+.backRow {
+  margin-top: 10px;
+}
+
+.backLink {
+  font-weight: 900;
+}
+
+@media (max-width: 1100px) {
+  .checkInDetailsGrid {
+    grid-template-columns: 1fr;
+  }
+}
