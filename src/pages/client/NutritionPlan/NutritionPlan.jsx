@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import mockNutritionLegacy from "../../../data/mockNutritionLegacy";
+import InfoStrip from "../../../components/nutrition/InfoStrip/InfoStrip";
+import CoachNotesCard from "../../../components/nutrition/CoachNotesCard/CoachNotesCard";
+import MacroBreakdownCard from "../../../components/nutrition/MacroBreakdownCard/MacroBreakdownCard";
 import "./NutritionPlan.css";
 
 function NutritionPlan() {
@@ -13,7 +16,6 @@ function NutritionPlan() {
 
   const [selectedDayId, setSelectedDayId] = useState(selectedPlan.days[0].id);
 
-  // If plan changes, reset day safely
   function handlePlanChange(e) {
     const newPlanId = e.target.value;
     setSelectedPlanId(newPlanId);
@@ -50,7 +52,8 @@ function NutritionPlan() {
   }, [selectedDay]);
 
   const macroPercents = useMemo(() => {
-    const totalGrams = plannedTotals.protein + plannedTotals.carbs + plannedTotals.fat;
+    const totalGrams =
+      plannedTotals.protein + plannedTotals.carbs + plannedTotals.fat;
     if (!totalGrams) return { protein: 0, carbs: 0, fat: 0 };
 
     return {
@@ -59,6 +62,11 @@ function NutritionPlan() {
       fat: Math.round((plannedTotals.fat / totalGrams) * 100),
     };
   }, [plannedTotals]);
+
+  function handleViewHistory() {
+    // Placeholder only (we’ll connect to a page later if you want)
+    alert("Nutrition history will be added later.");
+  }
 
   return (
     <div>
@@ -71,7 +79,6 @@ function NutritionPlan() {
       <div className="nutritionLegacyLayout">
         {/* LEFT COLUMN */}
         <div className="nutritionLegacyLeft">
-          {/* Controls card (matches screenshot top controls block) */}
           <div className="card nutritionLegacyCard">
             <div className="nutritionLegacyControlsRow">
               <div className="nutritionLegacyControl">
@@ -105,36 +112,27 @@ function NutritionPlan() {
               </div>
             </div>
 
-            <div className="nutritionLegacyGoalsStrip">
-              <strong>Daily Calorie Goal:</strong> {selectedPlan.dailyGoals.calories} kcal{" "}
-              | <strong>Protein:</strong> {selectedPlan.dailyGoals.protein}g |{" "}
-              <strong>Carbs:</strong> {selectedPlan.dailyGoals.carbs}g |{" "}
-              <strong>Fat:</strong> {selectedPlan.dailyGoals.fat}g
-            </div>
+            <InfoStrip
+              calories={selectedPlan.dailyGoals.calories}
+              protein={selectedPlan.dailyGoals.protein}
+              carbs={selectedPlan.dailyGoals.carbs}
+              fat={selectedPlan.dailyGoals.fat}
+            />
           </div>
 
-          {/* Coach notes card */}
-          <div className="card nutritionLegacyCard">
-            <div className="nutritionLegacyCardTitle">Coach Notes</div>
-            <div className="nutritionLegacyNotes">{selectedPlan.coachNotes}</div>
-          </div>
+          <CoachNotesCard notes={selectedPlan.coachNotes} />
 
-          {/* Meals card (accordion/table will be componentized in Step 2/3) */}
           <div className="card nutritionLegacyCard">
             <div className="nutritionLegacyCardTitle">Meals</div>
 
-            {/* Placeholder structure: in Step 2/3 we rebuild as components */}
             <div className="nutritionLegacyMealsPlaceholder">
               {selectedDay?.meals.map((meal, idx) => (
                 <div key={meal.id} className="nutritionLegacyMealRow">
                   <div className="nutritionLegacyMealHeader">
-                    <div className="nutritionLegacyMealTitle">
-                      {meal.title}
-                    </div>
+                    <div className="nutritionLegacyMealTitle">{meal.title}</div>
                     <div className="nutritionLegacyMealTime">{meal.time}</div>
                   </div>
 
-                  {/* Only the first meal shows table preview (like screenshot expanded) */}
                   {idx === 0 ? (
                     <div className="nutritionLegacyMealTablePlaceholder">
                       Table preview will be rebuilt as a reusable component in Step 3.
@@ -148,69 +146,11 @@ function NutritionPlan() {
 
         {/* RIGHT COLUMN */}
         <div className="nutritionLegacyRight">
-          <div className="card nutritionLegacyCard">
-            <div className="nutritionLegacyCardTitle">Today's Macro Breakdown</div>
-
-            <div className="nutritionLegacyRingWrap">
-              <div className="nutritionLegacyRing">
-                <div className="nutritionLegacyRingCenter">
-                  <div className="nutritionLegacyRingValue">
-                    {selectedPlan.dailyGoals.calories}
-                  </div>
-                  <div className="nutritionLegacyRingUnit">kcal</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="nutritionLegacyMacroList">
-              <div className="nutritionLegacyMacroRow">
-                <div className="nutritionLegacyMacroTop">
-                  <span>Protein</span>
-                  <strong>{macroPercents.protein}%</strong>
-                </div>
-                <div className="nutritionLegacyBar">
-                  <div
-                    className="nutritionLegacyBarFill"
-                    style={{ width: `${macroPercents.protein}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="nutritionLegacyMacroRow">
-                <div className="nutritionLegacyMacroTop">
-                  <span>Carbs</span>
-                  <strong>{macroPercents.carbs}%</strong>
-                </div>
-                <div className="nutritionLegacyBar">
-                  <div
-                    className="nutritionLegacyBarFill"
-                    style={{ width: `${macroPercents.carbs}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="nutritionLegacyMacroRow">
-                <div className="nutritionLegacyMacroTop">
-                  <span>Fat</span>
-                  <strong>{macroPercents.fat}%</strong>
-                </div>
-                <div className="nutritionLegacyBar">
-                  <div
-                    className="nutritionLegacyBarFill"
-                    style={{ width: `${macroPercents.fat}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="nutritionLegacyTotalCalories">
-              <strong>Total Calories:</strong> {selectedPlan.dailyGoals.calories} kcal
-            </div>
-
-            <button className="nutritionLegacyOutlineBtn" type="button">
-              View Nutrition History
-            </button>
-          </div>
+          <MacroBreakdownCard
+            caloriesGoal={selectedPlan.dailyGoals.calories}
+            macroPercents={macroPercents}
+            onViewHistory={handleViewHistory}
+          />
         </div>
       </div>
     </div>
