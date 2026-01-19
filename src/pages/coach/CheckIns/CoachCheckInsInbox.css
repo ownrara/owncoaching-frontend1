@@ -1,0 +1,51 @@
+.checkInsInboxTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 12px 0 14px 0;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.checkInsStats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.checkInsStat {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 120px;
+}
+
+.checkInsStatLabel {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.checkInsStatValue {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.checkInsFilterLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.checkInsSelect {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}

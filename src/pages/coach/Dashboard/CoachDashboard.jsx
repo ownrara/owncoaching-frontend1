@@ -28,7 +28,11 @@ function CoachDashboard() {
       />
 
       <div className="section">
-        <CheckInsTable rows={pendingRows} />
+        <CheckInsTable
+            rows={pendingRows}
+            title="Pending Check-Ins"
+             emptyText="No pending check-ins."
+        />
       </div>
     </div>
   );
