@@ -4,34 +4,37 @@ import mockNutritionPlan from "../../../data/mockNutritionPlan";
 
 import PlanSelector from "../../../components/nutrition/PlanSelector";
 import DaySelector from "../../../components/nutrition/DaySelector";
-import MealCard from "../../../components/nutrition/MealCard";
-import MacroSummary from "../../../components/nutrition/MacroSummary";
-import "../../../components/nutrition/Nutrition.css";
+import InfoStrip from "../../../components/nutrition/InfoStrip/InfoStrip";
+import CoachNotesCard from "../../../components/nutrition/CoachNotesCard/CoachNotesCard";
+import MacroBreakdownCard from "../../../components/nutrition/MacroBreakdownCard/MacroBreakdownCard";
+import MealAccordion from "../../../components/nutrition/MealAccordion/MealAccordion";
+
 import "./NutritionPlan.css";
+import "../../../components/nutrition/Nutrition.css";
 
 function NutritionPlan() {
   const plans = mockNutritionPlan.plans;
 
-  const [selectedPlanId, setSelectedPlanId] = useState(plans[0].id);
+  const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id || "");
   const selectedPlan = useMemo(() => {
-    return plans.find((p) => p.id === selectedPlanId);
+    return plans.find((p) => p.id === selectedPlanId) || plans[0];
   }, [plans, selectedPlanId]);
 
-  const [selectedDay, setSelectedDay] = useState(selectedPlan.days[0].day);
+  const [selectedDay, setSelectedDay] = useState(
+    selectedPlan?.days?.[0]?.day || ""
+  );
 
-  // If plan changes, make sure day is valid for that plan
   function handlePlanChange(newPlanId) {
     setSelectedPlanId(newPlanId);
 
     const newPlan = plans.find((p) => p.id === newPlanId);
-    if (newPlan && newPlan.days.length > 0) {
-      setSelectedDay(newPlan.days[0].day);
-    }
+    if (newPlan?.days?.length) setSelectedDay(newPlan.days[0].day);
+    else setSelectedDay("");
   }
 
   const dayData = useMemo(() => {
     if (!selectedPlan) return null;
-    return selectedPlan.days.find((d) => d.day === selectedDay);
+    return selectedPlan.days.find((d) => d.day === selectedDay) || null;
   }, [selectedPlan, selectedDay]);
 
   const totals = useMemo(() => {
@@ -44,85 +47,95 @@ function NutritionPlan() {
 
     dayData.meals.forEach((meal) => {
       meal.items.forEach((item) => {
-        calories += item.calories;
-        protein += item.protein;
-        carbs += item.carbs;
-        fat += item.fat;
+        calories += Number(item.calories || 0);
+        protein += Number(item.protein || 0);
+        carbs += Number(item.carbs || 0);
+        fat += Number(item.fat || 0);
       });
     });
 
     return { calories, protein, carbs, fat };
   }, [dayData]);
 
+  const macroPercents = useMemo(() => {
+    const p = Number(selectedPlan?.dailyGoals?.protein || 0);
+    const c = Number(selectedPlan?.dailyGoals?.carbs || 0);
+    const f = Number(selectedPlan?.dailyGoals?.fat || 0);
+    const total = p + c + f;
+
+    if (!total) return { protein: 0, carbs: 0, fat: 0 };
+
+    return {
+      protein: Math.round((p / total) * 100),
+      carbs: Math.round((c / total) * 100),
+      fat: Math.round((f / total) * 100),
+    };
+  }, [selectedPlan]);
+
   return (
-    <div>
+    <div className="nutritionPage">
       <PageHeader
-        breadcrumb="Client / My Nutrition Plan"
+        breadcrumb="Dashboard / My Nutrition Plan"
         title="My Nutrition Plan"
-        subtitle="Your personalized meals and daily macro goals"
+        subtitle={`Plan: ${selectedPlan?.name || "-"} | Day: ${selectedDay || "-"}`}
       />
 
-      {/* Controls */}
-      <div className="section card">
-        <div className="nutritionTopRow">
-          <div className="nutritionControl">
-            <label className="nutritionLabel">Plan</label>
-            <PlanSelector
-              plans={plans}
-              selectedPlanId={selectedPlanId}
-              onChange={handlePlanChange}
-            />
-          </div>
-
-          <div className="nutritionControl">
-            <label className="nutritionLabel">Day</label>
-            <DaySelector
-              days={selectedPlan.days}
-              selectedDay={selectedDay}
-              onChange={setSelectedDay}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="section nutritionGrid">
+      <div className="nutritionGrid">
+        {/* LEFT COLUMN */}
         <div className="nutritionLeft">
-          <div className="card">
-            <MacroSummary goals={selectedPlan.dailyGoals} />
+          {/* top controls card */}
+          <div className="card nutritionTopCard">
+            <div className="nutritionControlsRow">
+              <div className="nutritionControl">
+                <div className="nutritionControlLabel">Current Plan</div>
+                <PlanSelector
+                  plans={plans}
+                  selectedPlanId={selectedPlanId}
+                  onChange={handlePlanChange}
+                />
+              </div>
+
+              <div className="nutritionControl">
+                <div className="nutritionControlLabel">Select Day</div>
+                <DaySelector
+                  days={selectedPlan?.days || []}
+                  selectedDay={selectedDay}
+                  onChange={setSelectedDay}
+                />
+              </div>
+            </div>
+
+            <div className="nutritionInfoStrip">
+              <InfoStrip goals={selectedPlan?.dailyGoals} />
+            </div>
           </div>
 
-          <div className="card nutritionTotals">
-            <h4>Planned Totals (Day)</h4>
-            <ul>
-              <li>
-                <strong>Calories:</strong> {totals.calories}
-              </li>
-              <li>
-                <strong>Protein:</strong> {totals.protein}g
-              </li>
-              <li>
-                <strong>Carbs:</strong> {totals.carbs}g
-              </li>
-              <li>
-                <strong>Fat:</strong> {totals.fat}g
-              </li>
-            </ul>
+          {/* coach notes */}
+          <div className="nutritionSection">
+            <CoachNotesCard text={selectedPlan?.coachNotes || ""} />
+          </div>
+
+          {/* meals */}
+          <div className="card nutritionMealsCard">
+            <div className="nutritionMealsHeader">Meals</div>
+
+            <div className="nutritionMealsBody">
+              {dayData ? (
+                <MealAccordion meals={dayData.meals} />
+              ) : (
+                <div className="nutritionEmpty">No meals found for this day.</div>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* RIGHT COLUMN */}
         <div className="nutritionRight">
-          {dayData ? (
-            dayData.meals.map((meal) => (
-              <div key={meal.mealName} className="card">
-                <MealCard meal={meal} />
-              </div>
-            ))
-          ) : (
-            <div className="card" style={{ padding: "16px" }}>
-              No meals found for this day.
-            </div>
-          )}
+          <MacroBreakdownCard
+            caloriesGoal={Number(selectedPlan?.dailyGoals?.calories || 0)}
+            macroPercents={macroPercents}
+            totals={totals}
+          />
         </div>
       </div>
     </div>

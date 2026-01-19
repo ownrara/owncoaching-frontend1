@@ -1,58 +1,87 @@
-.nutritionTopRow {
+/* Makes the page align like the old design (not centered tiny) */
+.nutritionPage {
+  width: 100%;
+}
+
+/* Main 2-column layout like old screenshot */
+.nutritionGrid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 18px;
+  align-items: start;
+  margin-top: 10px;
+}
+
+/* Left column should be wide */
+.nutritionLeft {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Right column fixed width card */
+.nutritionRight {
+  min-width: 0;
+}
+
+/* Top controls card */
+.nutritionTopCard {
+  padding: 14px;
+}
+
+.nutritionControlsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: 16px;
+  align-items: end;
 }
 
-.nutritionControl {
-  background: #ffffff;
-  border: 1px solid #e6e8ee;
-  border-radius: 10px;
-  padding: 12px 14px;
+.nutritionControlLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-bottom: 6px;
 }
 
-.nutritionLabel {
-  display: block;
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
+.nutritionInfoStrip {
+  margin-top: 12px;
 }
 
-.nutritionGrid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 12px;
-}
-
-.nutritionLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.nutritionTotals {
-  background: #ffffff;
-  border: 1px solid #e6e8ee;
-  border-radius: 10px;
-  padding: 14px 16px;
-}
-
-.nutritionTotals h4 {
+/* Coach Notes spacing */
+.nutritionSection {
   margin-top: 0;
 }
 
-.nutritionTotals ul {
-  margin: 0;
-  padding-left: 18px;
+/* Meals card */
+.nutritionMealsCard {
+  padding: 0;
+  overflow: hidden;
 }
 
-@media (max-width: 900px) {
-  .nutritionTopRow {
+.nutritionMealsHeader {
+  padding: 12px 14px;
+  font-weight: 900;
+  border-bottom: 1px solid var(--border);
+}
+
+.nutritionMealsBody {
+  padding: 12px 14px 14px 14px;
+}
+
+.nutritionEmpty {
+  padding: 10px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Responsive (stack columns) */
+@media (max-width: 1100px) {
+  .nutritionGrid {
     grid-template-columns: 1fr;
   }
 
-  .nutritionGrid {
+  .nutritionControlsRow {
     grid-template-columns: 1fr;
   }
 }
