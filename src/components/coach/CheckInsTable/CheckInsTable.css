@@ -1,0 +1,49 @@
+.checkInsTableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.checkInsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.checkInsTable th,
+.checkInsTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.checkInsTable th {
+  text-align: left;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--bg);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.badgePending {
+  border-color: rgba(58, 91, 255, 0.25);
+  background: rgba(58, 91, 255, 0.08);
+}
+
+.reviewBtn {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-weight: 800;
+}
+
+.reviewBtn:hover {
+  background: var(--bg);
+}
