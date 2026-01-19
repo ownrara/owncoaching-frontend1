@@ -1,15 +1,29 @@
 import { Link } from "react-router-dom";
 import "./CheckInsTable.css";
 
-function CheckInsTable({ rows }) {
+function CheckInsTable({
+  rows,
+  title = "Check-Ins",
+  emptyText = "No check-ins found.",
+}) {
   if (!rows || rows.length === 0) {
-    return <div className="card" style={{ padding: 16 }}>No pending check-ins.</div>;
+    return (
+      <div className="card" style={{ padding: 16 }}>
+        {emptyText}
+      </div>
+    );
   }
 
   return (
     <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-      <div style={{ padding: "12px 14px", fontWeight: 900, borderBottom: "1px solid var(--border)" }}>
-        Pending Check-Ins ({rows.length})
+      <div
+        style={{
+          padding: "12px 14px",
+          fontWeight: 900,
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        {title} ({rows.length})
       </div>
 
       <div className="checkInsTableWrap">
@@ -29,7 +43,11 @@ function CheckInsTable({ rows }) {
                 <td>{r.clientName}</td>
                 <td>{r.date}</td>
                 <td>
-                  <span className={r.status === "Pending" ? "badge badgePending" : "badge"}>
+                  <span
+                    className={
+                      r.status === "Pending" ? "badge badgePending" : "badge"
+                    }
+                  >
                     {r.status}
                   </span>
                 </td>

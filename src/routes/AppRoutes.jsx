@@ -12,6 +12,7 @@ import CoachLayout from "../layouts/CoachLayout/CoachLayout";
 import CoachDashboard from "../pages/coach/Dashboard/CoachDashboard";
 import CoachClients from "../pages/coach/Clients/CoachClients";
 import CoachCheckInDetails from "../pages/coach/CheckIns/CoachCheckInDetails";
+import CoachCheckInsInbox from "../pages/coach/CheckIns/CoachCheckInsInbox";
 
 function AppRoutes() {
   return (
@@ -34,6 +35,7 @@ function AppRoutes() {
           <Route path="dashboard" element={<CoachDashboard />} />
           <Route path="clients" element={<CoachClients />} />
           <Route path="check-ins/:checkInId" element={<CoachCheckInDetails />} />
+          <Route path="check-ins" element={<CoachCheckInsInbox />} />
           {/* next branches will add: check-ins, client details tabs, edit pages */}
         </Route>
 

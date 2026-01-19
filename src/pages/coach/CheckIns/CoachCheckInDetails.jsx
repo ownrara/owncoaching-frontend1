@@ -1,22 +1,59 @@
-import { useParams } from "react-router-dom";
+import { useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
+import CheckInsTable from "../../../components/coach/CheckInsTable/CheckInsTable";
+import mockCheckIns from "../../../data/mockCheckIns";
+import mockClients from "../../../data/mockClients";
 
-function CoachCheckInDetails() {
-  const { checkInId } = useParams();
+function CoachCheckInsInbox() {
+  const [status, setStatus] = useState("Pending"); // "Pending" | "Reviewed" | "All"
+
+  const rows = useMemo(() => {
+    const filtered =
+      status === "All"
+        ? mockCheckIns
+        : mockCheckIns.filter((c) => c.status === status);
+
+    return filtered.map((c) => {
+      const client = mockClients.find((x) => x.id === c.clientId);
+      return {
+        id: c.id,
+        clientName: client?.name || c.clientId,
+        date: c.date,
+        status: c.status,
+      };
+    });
+  }, [status]);
 
   return (
     <div>
       <PageHeader
-        breadcrumb="Coach / Check-Ins / Details"
-        title="Check-In Details"
-        subtitle={`Check-in: ${checkInId}`}
+        breadcrumb="Coach / Check-Ins"
+        title="Check-Ins Inbox"
+        subtitle="Review client check-ins and mark them as reviewed."
       />
 
-      <div className="card" style={{ padding: 16 }}>
-        Placeholder. Next branch will show full details + coach notes + mark reviewed.
+      {/* Simple filter (course-level) */}
+      <div className="section" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <button className="btn" onClick={() => setStatus("Pending")}>
+          Pending
+        </button>
+        <button className="btn" onClick={() => setStatus("Reviewed")}>
+          Reviewed
+        </button>
+        <button className="btn" onClick={() => setStatus("All")}>
+          All
+        </button>
+      </div>
+
+      <div className="section">
+        <CheckInsTable
+          rows={rows}
+          title={status === "All" ? "All Check-Ins" : `${status} Check-Ins`}
+          emptyText="No check-ins match this filter."
+        />
       </div>
     </div>
   );
 }
 
-export default CoachCheckInDetails;
+export default CoachCheckInsInbox;
