@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import ClientLayout from "../layouts/ClientLayout/ClientLayout";
 import ClientDashboard from "../pages/client/Dashboard/ClientDashboard";
 import TrainingPlan from "../pages/client/TrainingPlan/TrainingPlan";
@@ -7,14 +8,17 @@ import WeeklyCheckIn from "../pages/client/WeeklyCheckIn/WeeklyCheckIn";
 import ProgressHistory from "../pages/client/ProgressHistory/ProgressHistory";
 import ClientProfile from "../pages/client/ClientProfile/ClientProfile";
 
+import CoachLayout from "../layouts/CoachLayout/CoachLayout";
+import CoachDashboard from "../pages/coach/Dashboard/CoachDashboard";
+import CoachClients from "../pages/coach/Clients/CoachClients";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Default redirect */}
         <Route path="/" element={<Navigate to="/client/dashboard" replace />} />
 
-        {/* Client routes */}
+        {/* Client */}
         <Route path="/client" element={<ClientLayout />}>
           <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="training-plan" element={<TrainingPlan />} />
@@ -24,7 +28,13 @@ function AppRoutes() {
           <Route path="profile" element={<ClientProfile />} />
         </Route>
 
-        {/* Fallback */}
+        {/* Coach */}
+        <Route path="/coach" element={<CoachLayout />}>
+          <Route path="dashboard" element={<CoachDashboard />} />
+          <Route path="clients" element={<CoachClients />} />
+          {/* next branches will add: check-ins, client details tabs, edit pages */}
+        </Route>
+
         <Route path="*" element={<Navigate to="/client/dashboard" replace />} />
       </Routes>
     </BrowserRouter>

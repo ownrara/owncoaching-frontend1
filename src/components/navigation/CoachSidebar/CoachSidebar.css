@@ -1,0 +1,58 @@
+.coachSidebar {
+  width: 260px;
+  min-height: 100vh;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px;
+}
+
+.coachBrand {
+  padding: 6px 6px 14px 6px;
+}
+
+.coachBrandTitle {
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.coachBrandSub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.coachNav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.coachNavLink {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text);
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+
+.coachNavLink:hover {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.coachNavLink.isActive {
+  background: rgba(58, 91, 255, 0.08);
+  border-color: rgba(58, 91, 255, 0.25);
+}
+
+.coachSidebarFooter {
+  margin-top: auto;
+  padding: 12px 6px 0 6px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
