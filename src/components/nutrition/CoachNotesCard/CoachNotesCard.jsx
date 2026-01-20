@@ -1,10 +1,10 @@
 import "./CoachNotesCard.css";
 
-function CoachNotesCard({ notes }) {
+function CoachNotesCard({ text }) {
   return (
     <div className="card nutritionLegacyCard">
       <div className="nutritionLegacyCardTitle">Coach Notes</div>
-      <div className="nutritionLegacyNotes">{notes}</div>
+      <div className="nutritionLegacyNotes">{text && text.trim() ? text : "-"}</div>
     </div>
   );
 }

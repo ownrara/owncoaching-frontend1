@@ -6,19 +6,26 @@ import UnitToggle from "../../../components/checkin/UnitToggle/UnitToggle";
 import MeasurementsGrid from "../../../components/checkin/MeasurementsGrid/MeasurementsGrid";
 import PhotoUploadBox from "../../../components/checkin/PhotoUploadBox/PhotoUploadBox";
 import mockWeeklyCheckIn from "../../../data/mockWeeklyCheckIn";
+import { getCheckIns, saveCheckIns } from "../../../data/checkInsStore";
 import "./WeeklyCheckIn.css";
+
+// Course-level mock: assume logged-in client is c1
+const CURRENT_CLIENT_ID = "c1";
+
+function isoToday() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 function WeeklyCheckIn() {
   const [weightUnit, setWeightUnit] = useState(mockWeeklyCheckIn.weightUnit);
   const [measureUnit, setMeasureUnit] = useState(mockWeeklyCheckIn.measureUnit);
 
   const [weight, setWeight] = useState(mockWeeklyCheckIn.current.weight);
-
   const [body, setBody] = useState(mockWeeklyCheckIn.body);
-
   const [photos, setPhotos] = useState(mockWeeklyCheckIn.photos);
-
-  const [complianceNotes, setComplianceNotes] = useState(mockWeeklyCheckIn.complianceNotes);
+  const [complianceNotes, setComplianceNotes] = useState(
+    mockWeeklyCheckIn.complianceNotes
+  );
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -28,8 +35,41 @@ function WeeklyCheckIn() {
       return;
     }
 
-    // Mock submit only
-    alert("Weekly check-in submitted (mock).");
+    const all = getCheckIns();
+
+    const newCheckIn = {
+      id: `ci_${Date.now()}`,
+      clientId: CURRENT_CLIENT_ID,
+      date: isoToday(),
+
+      // minimal fields (keep consistent with HistoryTable)
+      weight: Number(weight),
+      waist: body?.waist ? Number(body.waist) : null,
+      sleepHours: null,
+      energy: "Average",
+      adherence: null,
+
+      notes: complianceNotes || "",
+      coachNotes: "",
+      status: "Pending",
+
+      // extra saved data (optional, but useful)
+      weightUnit,
+      measureUnit,
+      body,
+      photos,
+    };
+
+    // newest first
+    const next = [newCheckIn, ...all];
+    saveCheckIns(next);
+
+    alert("Weekly check-in submitted.");
+    // optional: reset fields (keep course simple)
+    setWeight("");
+    setBody(mockWeeklyCheckIn.body);
+    setPhotos(mockWeeklyCheckIn.photos);
+    setComplianceNotes("");
   }
 
   return (

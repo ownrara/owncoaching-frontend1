@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import FormCard from "../../../../components/form/FormCard/FormCard";
 import HistoryFilters from "../../../../components/history/HistoryFilters/HistoryFilters";
 import HistoryTable from "../../../../components/history/HistoryTable/HistoryTable";
 
-import { getCheckIns } from "../../../../data/checkInsStore";
+import { getCheckIns, onCheckInsChange } from "../../../../data/checkInsStore";
 import { formatNumber } from "../../../../utils/formatters";
+
+// Reuse the SAME layout CSS as client Progress History
+import "../../../client/ProgressHistory/ProgressHistory.css";
 
 const DEFAULT_FILTERS = {
   energy: "All",
@@ -19,19 +22,21 @@ function CoachClientProgressTab() {
   const { clientId } = useParams();
 
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [allCheckIns, setAllCheckIns] = useState(() => getCheckIns());
 
-  // Shared source of truth
-  const allCheckIns = useMemo(() => getCheckIns(), []);
+  useEffect(() => {
+    const off = onCheckInsChange(() => {
+      setAllCheckIns(getCheckIns());
+    });
+    return off;
+  }, []);
 
-  // Filter to THIS client only
   const clientRows = useMemo(() => {
-    return allCheckIns
+    return [...allCheckIns]
       .filter((c) => c.clientId === clientId)
-      // newest first
       .sort((a, b) => (a.date < b.date ? 1 : -1));
   }, [allCheckIns, clientId]);
 
-  // Apply same filters as client Progress History
   const filtered = useMemo(() => {
     return clientRows.filter((c) => {
       if (filters.energy !== "All" && c.energy !== filters.energy) return false;
@@ -44,7 +49,6 @@ function CoachClientProgressTab() {
         }
       }
 
-      // ISO date compares safely: YYYY-MM-DD
       if (filters.fromDate && c.date < filters.fromDate) return false;
       if (filters.toDate && c.date > filters.toDate) return false;
 
@@ -102,7 +106,6 @@ function CoachClientProgressTab() {
 
         <div className="progressRight">
           <div className="section">
-            {/* Reused component: includes Coach Notes column already */}
             <HistoryTable rows={filtered} />
           </div>
         </div>
