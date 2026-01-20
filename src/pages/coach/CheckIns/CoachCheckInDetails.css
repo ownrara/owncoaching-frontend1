@@ -23,10 +23,6 @@
   border-bottom: 1px solid var(--border);
 }
 
-.detailsRow:last-child {
-  border-bottom: 0;
-}
-
 .detailsLabel {
   color: var(--muted);
   font-weight: 800;

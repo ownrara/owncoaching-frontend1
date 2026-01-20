@@ -14,13 +14,14 @@ function HistoryTable({ rows }) {
             <th>Energy</th>
             <th>Adherence</th>
             <th>Notes</th>
+            <th>Coach Notes</th>
           </tr>
         </thead>
 
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan="7" className="emptyCell">
+              <td colSpan="8" className="emptyCell">
                 No check-ins match the current filters.
               </td>
             </tr>
@@ -34,6 +35,9 @@ function HistoryTable({ rows }) {
                 <td>{r.energy || "-"}</td>
                 <td>{formatNumber(r.adherence, "%")}</td>
                 <td className="notesCell">{r.notes || "-"}</td>
+                <td className="notesCell">
+                  {r.coachNotes ? r.coachNotes : "-"}
+                </td>
               </tr>
             ))
           )}
