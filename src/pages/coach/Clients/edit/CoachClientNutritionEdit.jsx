@@ -3,7 +3,12 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
 
 import mockClients from "../../../../data/mockClients";
-import { getNutritionState, saveNutritionState } from "../../../../data/nutritionPlansStore";
+import {
+  getNutritionState,
+  saveNutritionState,
+} from "../../../../data/nutritionPlansStore";
+
+import EditableMealsEditor from "../../../../components/nutrition/EditableMealsEditor/EditableMealsEditor";
 
 import "./CoachClientNutritionEdit.css";
 
@@ -16,7 +21,9 @@ function CoachClientNutritionEdit() {
   }, [clientId]);
 
   const [state, setState] = useState(() => getNutritionState(clientId));
-  const [selectedPlanId, setSelectedPlanId] = useState(state.currentPlanId || state.plans?.[0]?.id || "");
+  const [selectedPlanId, setSelectedPlanId] = useState(
+    state.currentPlanId || state.plans?.[0]?.id || ""
+  );
 
   useEffect(() => {
     const next = getNutritionState(clientId);
@@ -28,38 +35,44 @@ function CoachClientNutritionEdit() {
   const planIndex = plans.findIndex((p) => p.id === selectedPlanId);
   const plan = planIndex >= 0 ? plans[planIndex] : plans[0];
 
-  function setPlanField(name, value) {
-    setState((prev) => {
-      const nextPlans = [...(prev.plans || [])];
-      const idx = nextPlans.findIndex((p) => p.id === selectedPlanId);
-      if (idx === -1) return prev;
-
-      nextPlans[idx] = { ...nextPlans[idx], [name]: value };
-      return { ...prev, plans: nextPlans };
-    });
-  }
-
-  function setGoalsField(name, value) {
+  function updatePlan(mutator) {
     setState((prev) => {
       const nextPlans = [...(prev.plans || [])];
       const idx = nextPlans.findIndex((p) => p.id === selectedPlanId);
       if (idx === -1) return prev;
 
       const current = nextPlans[idx];
-      nextPlans[idx] = {
-        ...current,
-        dailyGoals: {
-          ...(current.dailyGoals || {}),
-          [name]: value === "" ? "" : Number(value),
-        },
-      };
+      const updated = mutator(current);
+      nextPlans[idx] = updated;
 
       return { ...prev, plans: nextPlans };
     });
   }
 
+  function setPlanField(name, value) {
+    updatePlan((current) => ({ ...current, [name]: value }));
+  }
+
+  function setGoalsField(name, value) {
+    updatePlan((current) => ({
+      ...current,
+      dailyGoals: {
+        ...(current.dailyGoals || {}),
+        [name]: value === "" ? "" : Number(value),
+      },
+    }));
+  }
+
+  // This is the ONLY callback EditableMealsEditor needs:
+  // it will give us the updated days array.
+  function setDays(nextDays) {
+    updatePlan((current) => ({
+      ...current,
+      days: nextDays,
+    }));
+  }
+
   function handleSave() {
-    // also persist which plan is current (simple)
     const nextState = {
       ...state,
       currentPlanId: selectedPlanId,
@@ -92,6 +105,7 @@ function CoachClientNutritionEdit() {
         subtitle={`${client?.name || clientId}`}
       />
 
+      {/* Plan meta */}
       <div className="section">
         <div className="card editCard">
           <div className="editGrid">
@@ -137,13 +151,16 @@ function CoachClientNutritionEdit() {
                 type="number"
                 min="1"
                 value={plan.durationWeeks ?? ""}
-                onChange={(e) => setPlanField("durationWeeks", Number(e.target.value))}
+                onChange={(e) =>
+                  setPlanField("durationWeeks", Number(e.target.value))
+                }
               />
             </div>
           </div>
         </div>
       </div>
 
+      {/* Daily Goals */}
       <div className="section">
         <div className="card editCard">
           <div style={{ fontWeight: 900, marginBottom: 10 }}>Daily Goals</div>
@@ -196,6 +213,7 @@ function CoachClientNutritionEdit() {
         </div>
       </div>
 
+      {/* Coach Notes */}
       <div className="section">
         <div className="card editCard">
           <div style={{ fontWeight: 900, marginBottom: 10 }}>Coach Notes</div>
@@ -209,6 +227,15 @@ function CoachClientNutritionEdit() {
         </div>
       </div>
 
+      {/* Days + Meals Editor (Add/Remove/Rename/Reorder/Duplicate + meal editing) */}
+      <div className="section">
+        <EditableMealsEditor
+          days={plan.days || []}
+          onChangeDays={setDays}
+        />
+      </div>
+
+      {/* Actions */}
       <div className="section">
         <div className="editActions">
           <Link className="secondaryBtn" to={`/coach/clients/${clientId}/nutrition`}>
