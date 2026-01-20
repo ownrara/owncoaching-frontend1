@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+/* ========== CLIENT ========== */
 import ClientLayout from "../layouts/ClientLayout/ClientLayout";
 import ClientDashboard from "../pages/client/Dashboard/ClientDashboard";
 import TrainingPlan from "../pages/client/TrainingPlan/TrainingPlan";
@@ -8,19 +9,29 @@ import WeeklyCheckIn from "../pages/client/WeeklyCheckIn/WeeklyCheckIn";
 import ProgressHistory from "../pages/client/ProgressHistory/ProgressHistory";
 import ClientProfile from "../pages/client/ClientProfile/ClientProfile";
 
+/* ========== COACH ========== */
 import CoachLayout from "../layouts/CoachLayout/CoachLayout";
 import CoachDashboard from "../pages/coach/Dashboard/CoachDashboard";
 import CoachClients from "../pages/coach/Clients/CoachClients";
-import CoachCheckInDetails from "../pages/coach/CheckIns/CoachCheckInDetails";
+
+import CoachClientDetails from "../pages/coach/Clients/CoachClientDetails";
+import CoachClientOverviewTab from "../pages/coach/Clients/tabs/CoachClientOverviewTab";
+import CoachClientProgressTab from "../pages/coach/Clients/tabs/CoachClientProgressTab";
+import CoachClientCheckInsTab from "../pages/coach/Clients/tabs/CoachClientCheckInsTab";
+import CoachClientTrainingTab from "../pages/coach/Clients/tabs/CoachClientTrainingTab";
+import CoachClientNutritionTab from "../pages/coach/Clients/tabs/CoachClientNutritionTab";
+
 import CoachCheckInsInbox from "../pages/coach/CheckIns/CoachCheckInsInbox";
+import CoachCheckInDetails from "../pages/coach/CheckIns/CoachCheckInDetails";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* ROOT */}
         <Route path="/" element={<Navigate to="/client/dashboard" replace />} />
 
-        {/* Client */}
+        {/* ================= CLIENT ROUTES ================= */}
         <Route path="/client" element={<ClientLayout />}>
           <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="training-plan" element={<TrainingPlan />} />
@@ -30,15 +41,27 @@ function AppRoutes() {
           <Route path="profile" element={<ClientProfile />} />
         </Route>
 
-        {/* Coach */}
+        {/* ================= COACH ROUTES ================= */}
         <Route path="/coach" element={<CoachLayout />}>
           <Route path="dashboard" element={<CoachDashboard />} />
           <Route path="clients" element={<CoachClients />} />
-          <Route path="check-ins/:checkInId" element={<CoachCheckInDetails />} />
+
+          {/* CLIENT DETAILS (nested tabs) */}
+          <Route path="clients/:clientId" element={<CoachClientDetails />}>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route path="overview" element={<CoachClientOverviewTab />} />
+            <Route path="progress" element={<CoachClientProgressTab />} />
+            <Route path="check-ins" element={<CoachClientCheckInsTab />} />
+            <Route path="training" element={<CoachClientTrainingTab />} />
+            <Route path="nutrition" element={<CoachClientNutritionTab />} />
+          </Route>
+
+          {/* CHECK-INS */}
           <Route path="check-ins" element={<CoachCheckInsInbox />} />
-          {/* next branches will add: check-ins, client details tabs, edit pages */}
+          <Route path="check-ins/:checkInId" element={<CoachCheckInDetails />} />
         </Route>
 
+        {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/client/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
