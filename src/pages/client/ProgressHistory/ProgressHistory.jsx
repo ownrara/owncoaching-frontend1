@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import FormCard from "../../../components/form/FormCard/FormCard";
 import HistoryFilters from "../../../components/history/HistoryFilters/HistoryFilters";
@@ -17,11 +17,16 @@ const DEFAULT_FILTERS = {
 function ProgressHistory() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
-  // course-level "store read" (one-time init)
-  const [checkIns] = useState(() => getCheckIns());
+  // shared source of truth (store read)
+  const [allCheckIns, setAllCheckIns] = useState(() => getCheckIns());
+
+  // reload from store when page mounts
+  useEffect(() => {
+    setAllCheckIns(getCheckIns());
+  }, []);
 
   const filtered = useMemo(() => {
-    return checkIns.filter((c) => {
+    return allCheckIns.filter((c) => {
       // Energy filter
       if (filters.energy !== "All" && c.energy !== filters.energy) return false;
 
@@ -40,7 +45,7 @@ function ProgressHistory() {
 
       return true;
     });
-  }, [filters, checkIns]);
+  }, [filters, allCheckIns]);
 
   const summary = useMemo(() => {
     const count = filtered.length;
