@@ -24,6 +24,8 @@ import CoachClientNutritionTab from "../pages/coach/Clients/tabs/CoachClientNutr
 import CoachCheckInsInbox from "../pages/coach/CheckIns/CoachCheckInsInbox";
 import CoachCheckInDetails from "../pages/coach/CheckIns/CoachCheckInDetails";
 
+import CoachClientTrainingEdit from "../pages/coach/Clients/edit/CoachClientTrainingEdit";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -45,6 +47,12 @@ function AppRoutes() {
         <Route path="/coach" element={<CoachLayout />}>
           <Route path="dashboard" element={<CoachDashboard />} />
           <Route path="clients" element={<CoachClients />} />
+
+          {/* Edit Training (keep it OUTSIDE tabs nesting to avoid path confusion) */}
+          <Route
+            path="clients/:clientId/training/edit"
+            element={<CoachClientTrainingEdit />}
+          />
 
           {/* CLIENT DETAILS (nested tabs) */}
           <Route path="clients/:clientId" element={<CoachClientDetails />}>
