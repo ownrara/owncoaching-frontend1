@@ -1,16 +1,34 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import WeekSelector from "../../../components/training/WeekSelector/WeekSelector";
 import DayAccordion from "../../../components/training/DayAccordion/DayAccordion";
-import mockTrainingPlan from "../../../data/mockTrainingPlan";
+import { getTrainingPlan, onTrainingPlansChange } from "../../../data/trainingPlansStore";
 import "./TrainingPlan.css";
 
+// Course-level mock: assume logged-in client is c1
+const CURRENT_CLIENT_ID = "c1";
+
 function TrainingPlan() {
-  const [selectedWeek, setSelectedWeek] = useState(mockTrainingPlan.currentWeek);
+  const [plan, setPlan] = useState(() => getTrainingPlan(CURRENT_CLIENT_ID));
+  const [selectedWeek, setSelectedWeek] = useState(plan.currentWeek);
+
+  useEffect(() => {
+    // keep client view synced after coach saves
+    const off = onTrainingPlansChange(() => {
+      const next = getTrainingPlan(CURRENT_CLIENT_ID);
+      setPlan(next);
+      setSelectedWeek((prev) => {
+        const exists = next.weeks.some((w) => w.weekNumber === prev);
+        return exists ? prev : next.currentWeek;
+      });
+    });
+
+    return off;
+  }, []);
 
   const weekData = useMemo(() => {
-    return mockTrainingPlan.weeks.find((w) => w.weekNumber === selectedWeek);
-  }, [selectedWeek]);
+    return plan.weeks.find((w) => w.weekNumber === selectedWeek) || null;
+  }, [plan, selectedWeek]);
 
   return (
     <div>
@@ -23,9 +41,9 @@ function TrainingPlan() {
       {/* Plan meta */}
       <div className="section">
         <div className="trainingPlanMeta card">
-          <div className="trainingPlanName">{mockTrainingPlan.planName}</div>
+          <div className="trainingPlanName">{plan.planName}</div>
           <div className="trainingPlanSub">
-            Duration: {mockTrainingPlan.durationWeeks} weeks
+            Duration: {plan.durationWeeks} weeks
             {weekData ? ` • Focus: ${weekData.focus}` : ""}
           </div>
         </div>
@@ -34,7 +52,7 @@ function TrainingPlan() {
       {/* Week selector */}
       <div className="section card">
         <WeekSelector
-          weeks={mockTrainingPlan.weeks}
+          weeks={plan.weeks}
           selectedWeekNumber={selectedWeek}
           onSelectWeek={setSelectedWeek}
         />
