@@ -25,6 +25,7 @@ import CoachCheckInsInbox from "../pages/coach/CheckIns/CoachCheckInsInbox";
 import CoachCheckInDetails from "../pages/coach/CheckIns/CoachCheckInDetails";
 
 import CoachClientTrainingEdit from "../pages/coach/Clients/edit/CoachClientTrainingEdit";
+import CoachClientNutritionEdit from "../pages/coach/Clients/edit/CoachClientNutritionEdit";
 
 function AppRoutes() {
   return (
@@ -52,6 +53,11 @@ function AppRoutes() {
           <Route
             path="clients/:clientId/training/edit"
             element={<CoachClientTrainingEdit />}
+          />
+          {/* Edit Nutrition (keep it OUTSIDE tabs nesting to avoid path confusion) */}
+          <Route
+            path="clients/:clientId/nutrition/edit"
+            element={<CoachClientNutritionEdit />}
           />
 
           {/* CLIENT DETAILS (nested tabs) */}
