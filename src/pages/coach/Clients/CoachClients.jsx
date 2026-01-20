@@ -1,6 +1,13 @@
+import { useMemo } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
+import mockClients from "../../../data/mockClients";
+import ClientsTable from "../../../components/coach/ClientsTable/ClientsTable";
 
 function CoachClients() {
+  const rows = useMemo(() => {
+    return [...mockClients].sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
+
   return (
     <div>
       <PageHeader
@@ -9,8 +16,8 @@ function CoachClients() {
         subtitle="View and manage your client list"
       />
 
-      <div className="card" style={{ padding: 16 }}>
-        This is a placeholder. Next branch will implement the clients table.
+      <div className="section">
+        <ClientsTable rows={rows} />
       </div>
     </div>
   );

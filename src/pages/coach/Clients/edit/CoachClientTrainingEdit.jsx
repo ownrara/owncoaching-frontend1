@@ -1,3 +1,4 @@
+// src/pages/coach/Clients/edit/CoachClientTrainingEdit.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
@@ -6,6 +7,23 @@ import EditableExerciseTable from "../../../../components/training/EditableExerc
 import { getTrainingPlan, saveTrainingPlan } from "../../../../data/trainingPlansStore";
 import mockClients from "../../../../data/mockClients";
 import "./CoachClientTrainingEdit.css";
+
+/**
+ * Course-level helpers (plain JS, no libs)
+ */
+function buildWeek(weekNumber) {
+  return {
+    weekNumber,
+    focus: "",
+    days: [{ day: "Day 1 - Custom", exercises: [] }],
+  };
+}
+
+function clampMin(n, min) {
+  const v = Number(n);
+  if (Number.isNaN(v)) return min;
+  return Math.max(min, v);
+}
 
 function CoachClientTrainingEdit() {
   const { clientId } = useParams();
@@ -16,14 +34,14 @@ function CoachClientTrainingEdit() {
   }, [clientId]);
 
   const [plan, setPlan] = useState(() => getTrainingPlan(clientId));
-  const [selectedWeek, setSelectedWeek] = useState(plan.currentWeek);
+  const [selectedWeek, setSelectedWeek] = useState(() => plan.currentWeek || 1);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
+  // When route param changes (different client)
   useEffect(() => {
-    // when route param changes (different client)
     const next = getTrainingPlan(clientId);
     setPlan(next);
-    setSelectedWeek(next.currentWeek);
+    setSelectedWeek(next.currentWeek || 1);
     setSelectedDayIndex(0);
   }, [clientId]);
 
@@ -62,13 +80,85 @@ function CoachClientTrainingEdit() {
     }));
   }
 
-  function handleSave() {
-    // persist to shared store for this client
-    saveTrainingPlan(clientId, plan);
+  /**
+   * OPTION B: + Add Week / Remove Week
+   * - WeekSelector stays reused
+   * - Duration becomes derived: plan.weeks.length
+   */
+  function addWeek() {
+    setPlan((prev) => {
+      const nextNumber = prev.weeks.length + 1;
+      const nextWeeks = [...prev.weeks, buildWeek(nextNumber)];
+      return {
+        ...prev,
+        durationWeeks: nextWeeks.length,
+        weeks: nextWeeks,
+      };
+    });
 
-    // go back to training tab (read-only view)
+    // Jump coach to the new week
+    setSelectedWeek(plan.weeks.length + 1);
+    setSelectedDayIndex(0);
+  }
+
+  function removeCurrentWeek() {
+    // Don’t allow deleting the last remaining week (course-level safeguard)
+    if (plan.weeks.length <= 1) return;
+
+    setPlan((prev) => {
+      const remaining = prev.weeks.filter((w) => w.weekNumber !== selectedWeek);
+
+      // Re-number weeks 1..N for clean structure
+      const renumbered = remaining.map((w, idx) => ({
+        ...w,
+        weekNumber: idx + 1,
+      }));
+
+      // Determine safe selected week after delete
+      const nextSelectedWeek = clampMin(
+        Math.min(selectedWeek, renumbered.length),
+        1
+      );
+
+      // Ensure currentWeek is valid too
+      const nextCurrentWeek = clampMin(
+        Math.min(prev.currentWeek || 1, renumbered.length),
+        1
+      );
+
+      // Update selectedWeek state outside via setter below (after setPlan),
+      // but we also return the updated plan here.
+      // (We will setSelectedWeek right after calling setPlan.)
+      return {
+        ...prev,
+        durationWeeks: renumbered.length,
+        currentWeek: nextCurrentWeek,
+        weeks: renumbered,
+        __nextSelectedWeek: nextSelectedWeek, // temporary internal hint
+      };
+    });
+  }
+
+  // After removeCurrentWeek, we used a temporary field to carry nextSelectedWeek.
+  // Clean it up and sync selectedWeek.
+  useEffect(() => {
+    if (plan.__nextSelectedWeek) {
+      const nextW = plan.__nextSelectedWeek;
+      setPlan((prev) => {
+        const { __nextSelectedWeek, ...clean } = prev;
+        return clean;
+      });
+      setSelectedWeek(nextW);
+      setSelectedDayIndex(0);
+    }
+  }, [plan]);
+
+  function handleSave() {
+    saveTrainingPlan(clientId, plan);
     navigate(`/coach/clients/${clientId}/training`);
   }
+
+  const canRemoveWeek = plan.weeks.length > 1;
 
   return (
     <div>
@@ -91,14 +181,14 @@ function CoachClientTrainingEdit() {
               />
             </div>
 
+            {/* Duration is derived from number of weeks */}
             <div className="editField">
               <label className="editLabel">Duration (weeks)</label>
               <input
                 className="editInput"
-                type="number"
-                min="1"
-                value={plan.durationWeeks}
-                onChange={(e) => setPlanField("durationWeeks", e.target.value)}
+                value={plan.weeks.length}
+                disabled
+                readOnly
               />
             </div>
 
@@ -106,9 +196,9 @@ function CoachClientTrainingEdit() {
               <label className="editLabel">Current Week</label>
               <select
                 className="editInput"
-                value={plan.currentWeek}
+                value={plan.currentWeek || 1}
                 onChange={(e) => {
-                  const v = Number(e.target.value);
+                  const v = clampMin(e.target.value, 1);
                   setPlanField("currentWeek", v);
                   setSelectedWeek(v);
                   setSelectedDayIndex(0);
@@ -121,6 +211,30 @@ function CoachClientTrainingEdit() {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Week actions */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 10,
+              marginTop: 12,
+            }}
+          >
+            <button type="button" className="secondaryBtn" onClick={addWeek}>
+              + Add Week
+            </button>
+
+            <button
+              type="button"
+              className="secondaryBtn"
+              onClick={removeCurrentWeek}
+              disabled={!canRemoveWeek}
+              title={!canRemoveWeek ? "You must keep at least 1 week." : ""}
+            >
+              Remove Week
+            </button>
           </div>
         </div>
       </div>
