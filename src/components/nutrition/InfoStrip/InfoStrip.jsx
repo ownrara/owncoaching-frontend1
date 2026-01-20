@@ -1,6 +1,13 @@
 import "./InfoStrip.css";
 
-function InfoStrip({ calories, protein, carbs, fat }) {
+function InfoStrip({ goals }) {
+  const g = goals || {};
+
+  const calories = g.calories ?? 0;
+  const protein = g.protein ?? 0;
+  const carbs = g.carbs ?? 0;
+  const fat = g.fat ?? 0;
+
   return (
     <div className="nutritionLegacyGoalsStrip">
       <strong>Daily Calorie Goal:</strong> {calories} kcal |{" "}

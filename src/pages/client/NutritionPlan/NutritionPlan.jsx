@@ -1,6 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
-import mockNutritionPlan from "../../../data/mockNutritionPlan";
 
 import PlanSelector from "../../../components/nutrition/PlanSelector";
 import DaySelector from "../../../components/nutrition/DaySelector";
@@ -9,20 +8,50 @@ import CoachNotesCard from "../../../components/nutrition/CoachNotesCard/CoachNo
 import MacroBreakdownCard from "../../../components/nutrition/MacroBreakdownCard/MacroBreakdownCard";
 import MealAccordion from "../../../components/nutrition/MealAccordion/MealAccordion";
 
+import { getNutritionState, onNutritionPlansChange } from "../../../data/nutritionPlansStore";
+
 import "./NutritionPlan.css";
 import "../../../components/nutrition/Nutrition.css";
 
-function NutritionPlan() {
-  const plans = mockNutritionPlan.plans;
+// Course-level mock: assume logged-in client is c1
+const CURRENT_CLIENT_ID = "c1";
 
-  const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id || "");
+function NutritionPlan() {
+  const [state, setState] = useState(() => getNutritionState(CURRENT_CLIENT_ID));
+
+  useEffect(() => {
+    const off = onNutritionPlansChange(() => {
+      setState(getNutritionState(CURRENT_CLIENT_ID));
+    });
+    return off;
+  }, []);
+
+  const plans = state.plans || [];
+
+  const [selectedPlanId, setSelectedPlanId] = useState(state.currentPlanId || plans[0]?.id || "");
+
+  // if store changes (coach saved), keep selection valid
+  useEffect(() => {
+    const nextId = state.currentPlanId || plans[0]?.id || "";
+    setSelectedPlanId((prev) => {
+      const exists = plans.some((p) => p.id === prev);
+      return exists ? prev : nextId;
+    });
+  }, [state.currentPlanId, plans]);
+
   const selectedPlan = useMemo(() => {
-    return plans.find((p) => p.id === selectedPlanId) || plans[0];
+    return plans.find((p) => p.id === selectedPlanId) || plans[0] || null;
   }, [plans, selectedPlanId]);
 
-  const [selectedDay, setSelectedDay] = useState(
-    selectedPlan?.days?.[0]?.day || ""
-  );
+  const [selectedDay, setSelectedDay] = useState(selectedPlan?.days?.[0]?.day || "");
+
+  useEffect(() => {
+    const firstDay = selectedPlan?.days?.[0]?.day || "";
+    setSelectedDay((prev) => {
+      const exists = selectedPlan?.days?.some((d) => d.day === prev);
+      return exists ? prev : firstDay;
+    });
+  }, [selectedPlan]);
 
   function handlePlanChange(newPlanId) {
     setSelectedPlanId(newPlanId);
@@ -81,9 +110,7 @@ function NutritionPlan() {
       />
 
       <div className="nutritionGrid">
-        {/* LEFT COLUMN */}
         <div className="nutritionLeft">
-          {/* top controls card */}
           <div className="card nutritionTopCard">
             <div className="nutritionControlsRow">
               <div className="nutritionControl">
@@ -110,12 +137,10 @@ function NutritionPlan() {
             </div>
           </div>
 
-          {/* coach notes */}
           <div className="nutritionSection">
             <CoachNotesCard text={selectedPlan?.coachNotes || ""} />
           </div>
 
-          {/* meals */}
           <div className="card nutritionMealsCard">
             <div className="nutritionMealsHeader">Meals</div>
 
@@ -129,7 +154,6 @@ function NutritionPlan() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN */}
         <div className="nutritionRight">
           <MacroBreakdownCard
             caloriesGoal={Number(selectedPlan?.dailyGoals?.calories || 0)}
