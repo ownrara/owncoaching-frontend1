@@ -2,6 +2,12 @@ import mockCheckIns from "./mockCheckIns";
 
 const KEY = "owncoaching_checkins_v1";
 
+const listeners = new Set();
+
+function emit() {
+  listeners.forEach((fn) => fn());
+}
+
 function normalizeCheckIns(list) {
   return list.map((c) => ({
     ...c,
@@ -25,8 +31,16 @@ export function getCheckIns() {
 
 export function saveCheckIns(next) {
   localStorage.setItem(KEY, JSON.stringify(next));
+  emit();
 }
 
 export function resetCheckIns() {
   localStorage.removeItem(KEY);
+  emit();
+}
+
+// Subscribe pattern (same idea as onTrainingPlansChange)
+export function onCheckInsChange(cb) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
 }
