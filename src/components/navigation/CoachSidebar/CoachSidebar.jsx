@@ -22,9 +22,6 @@ function CoachSidebar() {
         <NavLink to="/coach/check-ins" className={linkClass}>
           Check-Ins
         </NavLink>
-        <NavLink to="/coach/profile" className={linkClass}>
-          Profile
-        </NavLink>
       </nav>
 
       <div className="coachSidebarFooter">© OwnCoaching</div>
