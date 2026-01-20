@@ -12,9 +12,7 @@ function ClientsTable({ rows }) {
 
   return (
     <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-      <div className="clientsTableHeader">
-        Clients ({rows.length})
-      </div>
+      <div className="clientsTableHeader">Clients ({rows.length})</div>
 
       <div className="clientsTableWrap">
         <table className="clientsTable">
@@ -29,7 +27,7 @@ function ClientsTable({ rows }) {
           <tbody>
             {rows.map((c) => (
               <tr key={c.id}>
-                <td>{c.name}</td>
+                <td>{c.name || "-"}</td>
                 <td>{c.id}</td>
                 <td style={{ textAlign: "right" }}>
                   <Link className="viewBtn" to={`/coach/clients/${c.id}`}>
