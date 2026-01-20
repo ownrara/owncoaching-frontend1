@@ -1,76 +1,93 @@
-// src/data/trainingPlansStore.js
 import mockTrainingPlan from "./mockTrainingPlan";
 
-const KEY = "owncoaching_trainingplans_v1";
-const EVT = "owncoaching:trainingplans_changed";
+const KEY = "owncoaching_training_plans_v1";
 
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
+// simple event bus to refresh pages after save
+let listeners = [];
 
-function normalizePlan(plan) {
-  const safe = plan && typeof plan === "object" ? plan : {};
-  return {
-    planName: safe.planName ?? "Training Plan",
-    durationWeeks: Number(safe.durationWeeks ?? 12),
-    currentWeek: Number(safe.currentWeek ?? 1),
-    weeks: Array.isArray(safe.weeks) ? safe.weeks : [],
+export function onTrainingPlansChange(cb) {
+  listeners.push(cb);
+  return () => {
+    listeners = listeners.filter((x) => x !== cb);
   };
 }
 
-function buildDefaultForClient(clientId) {
-  // same default for all clients for now (course-level mock)
-  // but stored separately per clientId
-  const base = normalizePlan(mockTrainingPlan);
-
-  // ensure IDs/data are cloned so edits don’t mutate mock imports
-  return deepClone(base);
+function emit() {
+  listeners.forEach((fn) => fn());
 }
 
-function readAll() {
-  const raw = localStorage.getItem(KEY);
-  if (!raw) return {};
-
+function safeParse(raw) {
   try {
     const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? parsed : {};
+    return parsed && typeof parsed === "object" ? parsed : null;
   } catch {
-    return {};
+    return null;
   }
 }
 
-function writeAll(nextMap) {
-  localStorage.setItem(KEY, JSON.stringify(nextMap));
-  window.dispatchEvent(new Event(EVT));
+/**
+ * We store all training plans in an object:
+ * {
+ *   c1: { ...plan },
+ *   c2: { ...plan }
+ * }
+ */
+function getAllTrainingPlans() {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) return {};
+
+  const parsed = safeParse(raw);
+  return parsed ? parsed : {};
 }
 
-export function onTrainingPlansChange(handler) {
-  window.addEventListener(EVT, handler);
-  return () => window.removeEventListener(EVT, handler);
+function saveAllTrainingPlans(next) {
+  localStorage.setItem(KEY, JSON.stringify(next));
+  emit();
+}
+
+// ensure minimum shape (course-friendly)
+function normalizePlan(plan) {
+  const p = plan || {};
+
+  return {
+    planName: p.planName || "Training Plan",
+    durationWeeks: Number(p.durationWeeks || 12),
+    currentWeek: Number(p.currentWeek || 1),
+    weeks: Array.isArray(p.weeks) ? p.weeks : [],
+  };
+}
+
+// fallback: if no plan saved, use mockTrainingPlan as template
+function defaultPlanForClient(clientId) {
+  const base = normalizePlan(mockTrainingPlan);
+
+  // (optional) customize plan name per client so you can see it changed
+  return {
+    ...base,
+    planName: `${base.planName} (${clientId})`,
+  };
 }
 
 export function getTrainingPlan(clientId) {
-  const map = readAll();
-  const stored = map?.[clientId];
+  const all = getAllTrainingPlans();
+  const existing = all[clientId];
 
-  if (!stored) return buildDefaultForClient(clientId);
+  if (!existing) return defaultPlanForClient(clientId);
 
-  return normalizePlan(stored);
+  return normalizePlan(existing);
 }
 
-export function saveTrainingPlan(clientId, nextPlan) {
-  const map = readAll();
-  const normalized = normalizePlan(nextPlan);
-
-  const nextMap = {
-    ...map,
-    [clientId]: deepClone(normalized),
+export function saveTrainingPlan(clientId, plan) {
+  const all = getAllTrainingPlans();
+  const next = {
+    ...all,
+    [clientId]: normalizePlan(plan),
   };
 
-  writeAll(nextMap);
+  saveAllTrainingPlans(next);
 }
 
 export function resetTrainingPlans() {
   localStorage.removeItem(KEY);
-  window.dispatchEvent(new Event(EVT));
+  emit();
 }

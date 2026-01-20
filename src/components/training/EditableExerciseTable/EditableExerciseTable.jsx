@@ -8,11 +8,6 @@ function EditableExerciseTable({ exercises, onChangeExercises }) {
     onChangeExercises(next);
   }
 
-  function removeRow(index) {
-    const next = exercises.filter((_, i) => i !== index);
-    onChangeExercises(next);
-  }
-
   function addRow() {
     const next = [
       ...exercises,
@@ -21,24 +16,29 @@ function EditableExerciseTable({ exercises, onChangeExercises }) {
     onChangeExercises(next);
   }
 
+  function removeRow(index) {
+    const next = exercises.filter((_, i) => i !== index);
+    onChangeExercises(next);
+  }
+
   return (
-    <div className="exerciseTableWrap">
-      <table className="exerciseTable">
+    <div className="editTableWrap">
+      <table className="editTable">
         <thead>
           <tr>
             <th>Exercise</th>
-            <th style={{ width: 90 }}>Sets</th>
-            <th style={{ width: 120 }}>Reps</th>
+            <th>Sets</th>
+            <th>Reps</th>
             <th>Notes</th>
-            <th style={{ width: 80 }}></th>
+            <th></th>
           </tr>
         </thead>
 
         <tbody>
           {exercises.length === 0 ? (
             <tr>
-              <td colSpan="5" style={{ padding: 12, color: "var(--muted)" }}>
-                No exercises. Add one below.
+              <td colSpan="5" className="editEmpty">
+                No exercises. Click “Add Exercise”.
               </td>
             </tr>
           ) : (
@@ -46,40 +46,40 @@ function EditableExerciseTable({ exercises, onChangeExercises }) {
               <tr key={`${ex.name}-${idx}`}>
                 <td>
                   <input
-                    className="editInput"
+                    className="editCellInput"
                     value={ex.name}
                     onChange={(e) => updateRow(idx, "name", e.target.value)}
-                    placeholder="Exercise name"
+                    placeholder="Bench Press"
                   />
                 </td>
                 <td>
                   <input
-                    className="editInput"
+                    className="editCellInput"
                     value={ex.sets}
                     onChange={(e) => updateRow(idx, "sets", e.target.value)}
-                    placeholder="e.g. 4"
+                    placeholder="4"
                   />
                 </td>
                 <td>
                   <input
-                    className="editInput"
+                    className="editCellInput"
                     value={ex.reps}
                     onChange={(e) => updateRow(idx, "reps", e.target.value)}
-                    placeholder="e.g. 6-8"
+                    placeholder="6-8"
                   />
                 </td>
                 <td>
                   <input
-                    className="editInput"
-                    value={ex.notes}
+                    className="editCellInput"
+                    value={ex.notes || ""}
                     onChange={(e) => updateRow(idx, "notes", e.target.value)}
-                    placeholder="Notes"
+                    placeholder="RPE 7"
                   />
                 </td>
-                <td style={{ textAlign: "right" }}>
+                <td className="editActionsCell">
                   <button
                     type="button"
-                    className="smallDangerBtn"
+                    className="dangerBtn"
                     onClick={() => removeRow(idx)}
                   >
                     Remove
@@ -91,8 +91,8 @@ function EditableExerciseTable({ exercises, onChangeExercises }) {
         </tbody>
       </table>
 
-      <div style={{ paddingTop: 10 }}>
-        <button type="button" className="smallPrimaryBtn" onClick={addRow}>
+      <div className="editFooter">
+        <button type="button" className="secondaryBtn" onClick={addRow}>
           + Add Exercise
         </button>
       </div>
