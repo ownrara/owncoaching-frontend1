@@ -1,5 +1,4 @@
 import TextInput from "../../form/TextInput/TextInput";
-import SelectInput from "../../form/SelectInput/SelectInput";
 import "./HistoryFilters.css";
 
 function HistoryFilters({ filters, onChangeFilters, onReset }) {
@@ -11,23 +10,6 @@ function HistoryFilters({ filters, onChangeFilters, onReset }) {
   return (
     <div className="historyFilters">
       <div className="historyFiltersGrid">
-        <SelectInput
-          label="Energy"
-          name="energy"
-          value={filters.energy}
-          onChange={handleChange}
-          options={["All", "Great", "Good", "Average", "Low"]}
-        />
-
-        <TextInput
-          label="Min Adherence (%)"
-          name="minAdherence"
-          type="number"
-          value={filters.minAdherence}
-          onChange={handleChange}
-          placeholder="e.g. 80"
-        />
-
         <TextInput
           label="From Date"
           name="fromDate"

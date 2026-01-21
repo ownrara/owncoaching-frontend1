@@ -12,8 +12,6 @@ import { formatNumber } from "../../../../utils/formatters";
 import "../../../client/ProgressHistory/ProgressHistory.css";
 
 const DEFAULT_FILTERS = {
-  energy: "All",
-  minAdherence: "",
   fromDate: "",
   toDate: "",
 };
@@ -39,19 +37,8 @@ function CoachClientProgressTab() {
 
   const filtered = useMemo(() => {
     return clientRows.filter((c) => {
-      if (filters.energy !== "All" && c.energy !== filters.energy) return false;
-
-      if (filters.minAdherence !== "") {
-        const min = Number(filters.minAdherence);
-        if (!Number.isNaN(min)) {
-          if (c.adherence === null || c.adherence === undefined) return false;
-          if (Number(c.adherence) < min) return false;
-        }
-      }
-
       if (filters.fromDate && c.date < filters.fromDate) return false;
       if (filters.toDate && c.date > filters.toDate) return false;
-
       return true;
     });
   }, [clientRows, filters]);

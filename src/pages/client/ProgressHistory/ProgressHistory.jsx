@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import FormCard from "../../../components/form/FormCard/FormCard";
 import HistoryFilters from "../../../components/history/HistoryFilters/HistoryFilters";
@@ -8,8 +8,6 @@ import { formatNumber } from "../../../utils/formatters";
 import "./ProgressHistory.css";
 
 const DEFAULT_FILTERS = {
-  energy: "All",
-  minAdherence: "",
   fromDate: "",
   toDate: "",
 };
@@ -17,35 +15,17 @@ const DEFAULT_FILTERS = {
 function ProgressHistory() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
-  // shared source of truth (store read)
-  const [allCheckIns, setAllCheckIns] = useState(() => getCheckIns());
-
-  // reload from store when page mounts
-  useEffect(() => {
-    setAllCheckIns(getCheckIns());
-  }, []);
+  // course-level "store read" (one-time init)
+  const [checkIns] = useState(() => getCheckIns());
 
   const filtered = useMemo(() => {
-    return allCheckIns.filter((c) => {
-      // Energy filter
-      if (filters.energy !== "All" && c.energy !== filters.energy) return false;
-
-      // Min adherence
-      if (filters.minAdherence !== "") {
-        const min = Number(filters.minAdherence);
-        if (!Number.isNaN(min)) {
-          if (c.adherence === null || c.adherence === undefined) return false;
-          if (Number(c.adherence) < min) return false;
-        }
-      }
-
+    return checkIns.filter((c) => {
       // Date range (ISO string compares safely: YYYY-MM-DD)
       if (filters.fromDate && c.date < filters.fromDate) return false;
       if (filters.toDate && c.date > filters.toDate) return false;
-
       return true;
     });
-  }, [filters, allCheckIns]);
+  }, [filters, checkIns]);
 
   const summary = useMemo(() => {
     const count = filtered.length;

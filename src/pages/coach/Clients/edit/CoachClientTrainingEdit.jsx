@@ -4,9 +4,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
 import WeekSelector from "../../../../components/training/WeekSelector/WeekSelector";
 import EditableExerciseTable from "../../../../components/training/EditableExerciseTable/EditableExerciseTable";
-import { getTrainingPlan, saveTrainingPlan } from "../../../../data/trainingPlansStore";
+import {
+  getTrainingPlan,
+  saveTrainingPlan,
+} from "../../../../data/trainingPlansStore";
 import mockClients from "../../../../data/mockClients";
 import "./CoachClientTrainingEdit.css";
+
+import { searchExercisesByName } from "../../../../services/exerciseDBService";
 
 /**
  * Course-level helpers (plain JS, no libs)
@@ -41,10 +46,20 @@ function CoachClientTrainingEdit() {
   const [selectedWeek, setSelectedWeek] = useState(() => plan.currentWeek || 1);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
-  // Add Day input
   const [newDayName, setNewDayName] = useState("");
 
-  // When route param changes (different client)
+  // ✅ Quick API test (remove later if you want)
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await searchExercisesByName("bench");
+        console.log("ExerciseDB test result:", data);
+      } catch (e) {
+        console.error("ExerciseDB error:", e);
+      }
+    })();
+  }, []);
+
   useEffect(() => {
     const next = getTrainingPlan(clientId);
     setPlan(next);
@@ -88,12 +103,7 @@ function CoachClientTrainingEdit() {
     }));
   }
 
-  /**
-   * + Add Week / Remove Week
-   * Duration derived from number of weeks
-   */
   function addWeek() {
-    // Use functional setPlan so we don't depend on stale plan in closure
     setPlan((prev) => {
       const nextNumber = prev.weeks.length + 1;
       const nextWeeks = [...prev.weeks, buildWeek(nextNumber)];
@@ -104,24 +114,17 @@ function CoachClientTrainingEdit() {
       };
     });
 
-    // Jump to the new week (next number) + reset day
-    setSelectedWeek((prevSelected) => {
-      // best-effort: choose last week index based on current plan length
-      // (React state updates are async, so we use current plan length here)
-      return plan.weeks.length + 1;
-    });
+    setSelectedWeek(plan.weeks.length + 1);
     setSelectedDayIndex(0);
     setNewDayName("");
   }
 
   function removeCurrentWeek() {
-    // Don’t allow deleting the last remaining week
     if (plan.weeks.length <= 1) return;
 
     setPlan((prev) => {
       const remaining = prev.weeks.filter((w) => w.weekNumber !== selectedWeek);
 
-      // Renumber weeks 1..N
       const renumbered = remaining.map((w, idx) => ({
         ...w,
         weekNumber: idx + 1,
@@ -142,12 +145,11 @@ function CoachClientTrainingEdit() {
         durationWeeks: renumbered.length,
         currentWeek: nextCurrentWeek,
         weeks: renumbered,
-        __nextSelectedWeek: nextSelectedWeek, // temp hint for effect
+        __nextSelectedWeek: nextSelectedWeek,
       };
     });
   }
 
-  // Cleanup temp field + sync selected week after delete
   useEffect(() => {
     if (plan.__nextSelectedWeek) {
       const nextW = plan.__nextSelectedWeek;
@@ -163,9 +165,6 @@ function CoachClientTrainingEdit() {
     }
   }, [plan]);
 
-  /**
-   * + Add Day / Remove Day (selected)
-   */
   function addDay() {
     const name = safeText(newDayName);
     if (!name) return;
@@ -175,43 +174,38 @@ function CoachClientTrainingEdit() {
       weeks: prev.weeks.map((w) => {
         if (w.weekNumber !== selectedWeek) return w;
 
-        const existing = (w.days || []).some(
+        const exists = (w.days || []).some(
           (d) => safeText(d.day).toLowerCase() === name.toLowerCase()
         );
-        if (existing) return w;
+        if (exists) return w;
 
         const nextDays = [...(w.days || []), { day: name, exercises: [] }];
         return { ...w, days: nextDays };
       }),
     }));
 
-    // Select the new day (last index) using current days length
     setSelectedDayIndex(days.length);
     setNewDayName("");
   }
 
   function removeCurrentDay() {
     if (!weekData) return;
-    if (days.length <= 1) return; // keep at least 1 day (course-level safeguard)
+    if (days.length <= 1) return;
 
     setPlan((prev) => ({
       ...prev,
       weeks: prev.weeks.map((w) => {
         if (w.weekNumber !== selectedWeek) return w;
 
-        const nextDays = (w.days || []).filter((_, idx) => idx !== selectedDayIndex);
+        const nextDays = (w.days || []).filter(
+          (_, idx) => idx !== selectedDayIndex
+        );
 
-        // If coach removed the selected day, select a safe index afterwards
         return { ...w, days: nextDays };
       }),
     }));
 
-    // Move selection to previous day if possible, else first
-    setSelectedDayIndex((prevIdx) => {
-      const nextIdx = Math.max(0, prevIdx - 1);
-      return nextIdx;
-    });
-
+    setSelectedDayIndex((prevIdx) => Math.max(0, prevIdx - 1));
     setNewDayName("");
   }
 
@@ -231,7 +225,6 @@ function CoachClientTrainingEdit() {
         subtitle={`${client?.name || clientId}`}
       />
 
-      {/* Meta */}
       <div className="section">
         <div className="card editCard">
           <div className="editGrid">
@@ -244,10 +237,14 @@ function CoachClientTrainingEdit() {
               />
             </div>
 
-            {/* Duration derived from number of weeks */}
             <div className="editField">
               <label className="editLabel">Duration (weeks)</label>
-              <input className="editInput" value={plan.weeks.length} disabled readOnly />
+              <input
+                className="editInput"
+                value={plan.weeks.length}
+                disabled
+                readOnly
+              />
             </div>
 
             <div className="editField">
@@ -272,7 +269,6 @@ function CoachClientTrainingEdit() {
             </div>
           </div>
 
-          {/* Week actions */}
           <div
             style={{
               display: "flex",
@@ -299,7 +295,6 @@ function CoachClientTrainingEdit() {
         </div>
       </div>
 
-      {/* Week selector (reuse) */}
       <div className="section card">
         <WeekSelector
           weeks={plan.weeks}
@@ -312,7 +307,6 @@ function CoachClientTrainingEdit() {
         />
       </div>
 
-      {/* Week focus + Day selection + Day actions */}
       <div className="section">
         <div className="card editCard">
           <div className="editField" style={{ marginBottom: 12 }}>
@@ -340,15 +334,18 @@ function CoachClientTrainingEdit() {
               ))}
             </select>
 
-            {/* Day actions */}
             <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
-              <button type="button" className="secondaryBtn" onClick={removeCurrentDay} disabled={!canRemoveDay}>
+              <button
+                type="button"
+                className="secondaryBtn"
+                onClick={removeCurrentDay}
+                disabled={!canRemoveDay}
+              >
                 Remove Day
               </button>
             </div>
           </div>
 
-          {/* Add Day */}
           <div className="editField">
             <label className="editLabel">Add New Day</label>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -374,7 +371,6 @@ function CoachClientTrainingEdit() {
         </div>
       </div>
 
-      {/* Editable exercises */}
       <div className="section">
         <div className="card editCard">
           <div style={{ fontWeight: 900, marginBottom: 10 }}>
@@ -394,7 +390,6 @@ function CoachClientTrainingEdit() {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="section">
         <div className="editActions">
           <Link className="secondaryBtn" to={`/coach/clients/${clientId}/training`}>

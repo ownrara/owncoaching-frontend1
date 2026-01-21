@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
-import { getCheckIns } from "../../../data/checkInsStore";
+import { getCheckIns, onCheckInsChange } from "../../../data/checkInsStore";
 import mockClients from "../../../data/mockClients";
 import CheckInsTable from "../../../components/coach/CheckInsTable/CheckInsTable";
 import "./CoachCheckInsInbox.css";
@@ -9,9 +9,12 @@ const STATUS_OPTIONS = ["All", "Pending", "Reviewed"];
 
 function CoachCheckInsInbox() {
   const [status, setStatus] = useState("All");
+  const [checkIns, setCheckIns] = useState(() => getCheckIns());
 
-  // course-level "store read" (one-time init)
-  const [checkIns] = useState(() => getCheckIns());
+  useEffect(() => {
+    const off = onCheckInsChange(() => setCheckIns(getCheckIns()));
+    return off;
+  }, []);
 
   const rows = useMemo(() => {
     const filtered =
@@ -19,7 +22,6 @@ function CoachCheckInsInbox() {
         ? checkIns
         : checkIns.filter((c) => c.status === status);
 
-    // newest first (ISO date string)
     const sorted = [...filtered].sort((a, b) => (a.date < b.date ? 1 : -1));
 
     return sorted.map((c) => {

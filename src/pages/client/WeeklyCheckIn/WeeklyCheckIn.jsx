@@ -16,6 +16,37 @@ function isoToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Convert File -> { name, dataUrl } so it can be stored in localStorage safely
+function fileToDataUrl(file) {
+  return new Promise((resolve) => {
+    if (!file) return resolve(null);
+
+    // If it's already stored (object with dataUrl), keep it
+    if (typeof file === "object" && file.dataUrl && file.name) {
+      return resolve(file);
+    }
+
+    // If it's a real File
+    if (file instanceof File) {
+      const reader = new FileReader();
+      reader.onload = () => resolve({ name: file.name, dataUrl: reader.result });
+      reader.onerror = () => resolve({ name: file.name, dataUrl: "" });
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    resolve(null);
+  });
+}
+
+async function normalizePhotosForStorage(photos) {
+  const front = await fileToDataUrl(photos?.front || null);
+  const side = await fileToDataUrl(photos?.side || null);
+  const back = await fileToDataUrl(photos?.back || null);
+
+  return { front, side, back };
+}
+
 function WeeklyCheckIn() {
   const [weightUnit, setWeightUnit] = useState(mockWeeklyCheckIn.weightUnit);
   const [measureUnit, setMeasureUnit] = useState(mockWeeklyCheckIn.measureUnit);
@@ -27,7 +58,7 @@ function WeeklyCheckIn() {
     mockWeeklyCheckIn.complianceNotes
   );
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (!weight) {
@@ -37,35 +68,41 @@ function WeeklyCheckIn() {
 
     const all = getCheckIns();
 
+    // IMPORTANT: convert photos to storable structure
+    const photosStored = await normalizePhotosForStorage(photos);
+
     const newCheckIn = {
       id: `ci_${Date.now()}`,
       clientId: CURRENT_CLIENT_ID,
       date: isoToday(),
 
-      // minimal fields (keep consistent with HistoryTable)
+      // HistoryTable fields (keep)
       weight: Number(weight),
       waist: body?.waist ? Number(body.waist) : null,
       sleepHours: null,
       energy: "Average",
       adherence: null,
 
+      // Client compliance notes
       notes: complianceNotes || "",
+
+      // Coach will fill this later
       coachNotes: "",
       status: "Pending",
 
-      // extra saved data (optional, but useful)
+      // Full client submission (this is what coach must see)
       weightUnit,
       measureUnit,
-      body,
-      photos,
+      body: body || {},
+      photos: photosStored,
     };
 
-    // newest first
     const next = [newCheckIn, ...all];
     saveCheckIns(next);
 
     alert("Weekly check-in submitted.");
-    // optional: reset fields (keep course simple)
+
+    // reset (course simple)
     setWeight("");
     setBody(mockWeeklyCheckIn.body);
     setPhotos(mockWeeklyCheckIn.photos);

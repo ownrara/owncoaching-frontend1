@@ -3,13 +3,54 @@ import { Link, useParams } from "react-router-dom";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import CoachNotesBox from "../../../components/coach/CoachNotesBox/CoachNotesBox";
 import mockClients from "../../../data/mockClients";
-import { getCheckIns, saveCheckIns } from "../../../data/checkInsStore";
+import { getCheckIns, onCheckInsChange, saveCheckIns } from "../../../data/checkInsStore";
 import "./CoachCheckInDetails.css";
+
+function formatUnitLabel(u) {
+  if (u === "in") return "in";
+  if (u === "cm") return "cm";
+  if (u === "lbs") return "lbs";
+  return "kg";
+}
+
+function PhotoPreview({ label, photo }) {
+  if (!photo) {
+    return (
+      <div className="card" style={{ padding: 12 }}>
+        <div style={{ fontWeight: 800, marginBottom: 6 }}>{label}</div>
+        <div style={{ color: "var(--muted)" }}>No photo</div>
+      </div>
+    );
+  }
+
+  const name = photo?.name || "photo";
+  const src = photo?.dataUrl || "";
+
+  return (
+    <div className="card" style={{ padding: 12 }}>
+      <div style={{ fontWeight: 800, marginBottom: 6 }}>{label}</div>
+      {src ? (
+        <img
+          src={src}
+          alt={name}
+          style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)" }}
+        />
+      ) : (
+        <div style={{ color: "var(--muted)" }}>{name}</div>
+      )}
+    </div>
+  );
+}
 
 function CoachCheckInDetails() {
   const { checkInId } = useParams();
 
   const [checkIns, setCheckIns] = useState(() => getCheckIns());
+
+  useEffect(() => {
+    const off = onCheckInsChange(() => setCheckIns(getCheckIns()));
+    return off;
+  }, []);
 
   const checkIn = useMemo(() => {
     return checkIns.find((c) => c.id === checkInId) || null;
@@ -37,7 +78,6 @@ function CoachCheckInDetails() {
     const next = checkIns.map((c) =>
       c.id === checkIn.id ? { ...c, coachNotes: draftNotes } : c
     );
-
     persist(next);
   }
 
@@ -49,7 +89,6 @@ function CoachCheckInDetails() {
         ? { ...c, status: "Reviewed", coachNotes: draftNotes }
         : c
     );
-
     persist(next);
   }
 
@@ -70,6 +109,11 @@ function CoachCheckInDetails() {
     );
   }
 
+  const weightUnit = formatUnitLabel(checkIn.weightUnit);
+  const measureUnit = formatUnitLabel(checkIn.measureUnit);
+  const body = checkIn.body || {};
+  const photos = checkIn.photos || {};
+
   return (
     <div>
       <PageHeader
@@ -80,6 +124,7 @@ function CoachCheckInDetails() {
 
       <div className="checkInDetailsGrid">
         <div className="checkInLeft">
+          {/* CLIENT SUBMISSION — match the client form sections */}
           <div className="card detailsCard">
             <div className="detailsTitle">Client Submission</div>
 
@@ -93,23 +138,70 @@ function CoachCheckInDetails() {
               <div className="detailsValue">{checkIn.date}</div>
             </div>
 
+            {/* 1) Weight */}
             <div className="detailsRow">
               <div className="detailsLabel">Weight</div>
-              <div className="detailsValue">{checkIn.weight} kg</div>
+              <div className="detailsValue">
+                {checkIn.weight ?? "-"} {weightUnit}
+              </div>
             </div>
 
-            <div className="detailsRow">
-              <div className="detailsLabel">Energy</div>
-              <div className="detailsValue">{checkIn.energy}</div>
+            {/* 2) Body Measurements */}
+            <div style={{ marginTop: 14, fontWeight: 900 }}>Body Measurements ({measureUnit})</div>
+            <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className="detailsRow">
+                <div className="detailsLabel">Left Arm</div>
+                <div className="detailsValue">{body.leftArm || "-"}</div>
+              </div>
+              <div className="detailsRow">
+                <div className="detailsLabel">Right Arm</div>
+                <div className="detailsValue">{body.rightArm || "-"}</div>
+              </div>
+
+              <div className="detailsRow">
+                <div className="detailsLabel">Chest</div>
+                <div className="detailsValue">{body.chest || "-"}</div>
+              </div>
+              <div className="detailsRow">
+                <div className="detailsLabel">Waist</div>
+                <div className="detailsValue">{body.waist || "-"}</div>
+              </div>
+
+              <div className="detailsRow">
+                <div className="detailsLabel">Hips</div>
+                <div className="detailsValue">{body.hips || "-"}</div>
+              </div>
+              <div className="detailsRow">
+                <div className="detailsLabel">Left Thigh</div>
+                <div className="detailsValue">{body.leftThigh || "-"}</div>
+              </div>
+
+              <div className="detailsRow">
+                <div className="detailsLabel">Right Thigh</div>
+                <div className="detailsValue">{body.rightThigh || "-"}</div>
+              </div>
+              <div className="detailsRow">
+                <div className="detailsLabel">Left Calf</div>
+                <div className="detailsValue">{body.leftCalf || "-"}</div>
+              </div>
+
+              <div className="detailsRow">
+                <div className="detailsLabel">Right Calf</div>
+                <div className="detailsValue">{body.rightCalf || "-"}</div>
+              </div>
             </div>
 
-            <div className="detailsRow">
-              <div className="detailsLabel">Adherence</div>
-              <div className="detailsValue">{checkIn.adherence ?? "-"}%</div>
+            {/* 3) Progress Photos */}
+            <div style={{ marginTop: 16, fontWeight: 900 }}>Progress Photos</div>
+            <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+              <PhotoPreview label="Front" photo={photos.front} />
+              <PhotoPreview label="Side" photo={photos.side} />
+              <PhotoPreview label="Back" photo={photos.back} />
             </div>
 
-            <div className="detailsNotes">
-              <div className="detailsLabel">Client Notes</div>
+            {/* 4) Compliance Notes */}
+            <div className="detailsNotes" style={{ marginTop: 14 }}>
+              <div className="detailsLabel">Compliance Notes</div>
               <div className="detailsNotesBox">{checkIn.notes || "-"}</div>
             </div>
           </div>

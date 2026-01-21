@@ -3,17 +3,35 @@ import mockCheckIns from "./mockCheckIns";
 const KEY = "owncoaching_checkins_v1";
 
 const listeners = new Set();
-
 function emit() {
   listeners.forEach((fn) => fn());
 }
 
-function normalizeCheckIns(list) {
-  return list.map((c) => ({
+function normalizePhotos(photos) {
+  const p = photos && typeof photos === "object" ? photos : {};
+  return {
+    front: p.front ?? null,
+    side: p.side ?? null,
+    back: p.back ?? null,
+  };
+}
+
+function normalizeCheckIn(c) {
+  return {
     ...c,
     coachNotes: c.coachNotes ?? "",
     status: c.status ?? "Pending",
-  }));
+
+    weightUnit: c.weightUnit ?? "kg",
+    measureUnit: c.measureUnit ?? "cm",
+    body: c.body && typeof c.body === "object" ? c.body : {},
+    photos: normalizePhotos(c.photos),
+    notes: c.notes ?? "",
+  };
+}
+
+function normalizeCheckIns(list) {
+  return list.map(normalizeCheckIn);
 }
 
 export function getCheckIns() {
@@ -39,7 +57,6 @@ export function resetCheckIns() {
   emit();
 }
 
-// Subscribe pattern (same idea as onTrainingPlansChange)
 export function onCheckInsChange(cb) {
   listeners.add(cb);
   return () => listeners.delete(cb);
