@@ -22,7 +22,7 @@ import CoachDashboard from "../pages/coach/Dashboard/CoachDashboard";
 import CoachClients from "../pages/coach/Clients/CoachClients";
 
 import CoachClientDetails from "../pages/coach/Clients/CoachClientDetails";
-import CoachClientOverviewTab from "../pages/coach/Clients/tabs/CoachClientOverviewTab";
+import CoachClientOverviewTab from "../pages/coach/clients/tabs/CoachClientOverviewTab";
 import CoachClientProgressTab from "../pages/coach/Clients/tabs/CoachClientProgressTab";
 import CoachClientCheckInsTab from "../pages/coach/Clients/tabs/CoachClientCheckInsTab";
 import CoachClientTrainingTab from "../pages/coach/Clients/tabs/CoachClientTrainingTab";
