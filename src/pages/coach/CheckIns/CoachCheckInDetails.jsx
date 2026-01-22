@@ -23,13 +23,6 @@ function normalizeStatus(status) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function statusToBackend(uiStatus) {
-  const s = String(uiStatus || "").trim().toLowerCase();
-  if (s === "reviewed") return "reviewed";
-  // anything else becomes submitted
-  return "submitted";
-}
-
 function PhotoPreview({ label, photo }) {
   if (!photo) {
     return (
@@ -80,7 +73,6 @@ function CoachCheckInDetails() {
     async function load() {
       try {
         const data = await fetchCheckInById(checkInId);
-
         if (!isMounted) return;
 
         const normalized = {
@@ -91,7 +83,7 @@ function CoachCheckInDetails() {
         setCheckIn(normalized);
         setDraftNotes(normalized.coachNotes || "");
 
-        // fetch client name (optional but recommended)
+        // fetch client name (optional)
         const clientId = normalized.clientId;
         if (clientId) {
           const c = await fetchClientById(clientId).catch(() => null);
@@ -113,9 +105,15 @@ function CoachCheckInDetails() {
     };
   }, [checkInId]);
 
-  // derived values (safe)
-  const weightUnit = useMemo(() => formatUnitLabel(checkIn?.weightUnit), [checkIn]);
-  const measureUnit = useMemo(() => formatUnitLabel(checkIn?.measureUnit), [checkIn]);
+  const weightUnit = useMemo(
+    () => formatUnitLabel(checkIn?.weightUnit),
+    [checkIn]
+  );
+  const measureUnit = useMemo(
+    () => formatUnitLabel(checkIn?.measureUnit),
+    [checkIn]
+  );
+
   const body = checkIn?.body || {};
   const photos = checkIn?.photos || {};
 
@@ -125,16 +123,13 @@ function CoachCheckInDetails() {
 
     setSaving(true);
     try {
-      // ✅ safer: never accidentally downgrade "Reviewed"
-      const nextStatus =
-        checkIn.status === "Reviewed" ? "reviewed" : "submitted";
+      const nextStatus = checkIn.status === "Reviewed" ? "reviewed" : "submitted";
 
       await reviewCheckIn(checkIn.id, {
         status: nextStatus,
         coachNotes: draftNotes,
       });
 
-      // update local UI state (no refetch needed)
       setCheckIn((prev) => (prev ? { ...prev, coachNotes: draftNotes } : prev));
       alert("Notes saved");
     } catch (err) {
@@ -168,156 +163,147 @@ function CoachCheckInDetails() {
     }
   }
 
-  if (loading) {
-    return (
-      <div>
-        <PageHeader
-          breadcrumb="Coach / Check-Ins / Details"
-          title="Check-In Details"
-          subtitle="Loading..."
-        />
-        <div className="card" style={{ padding: 16 }}>Loading check-in...</div>
-      </div>
-    );
-  }
-
-  if (!checkIn) {
-    return (
-      <div>
-        <PageHeader
-          breadcrumb="Coach / Check-Ins / Details"
-          title="Check-In Details"
-          subtitle={`Not found: ${checkInId}`}
-        />
-        <div className="card" style={{ padding: 16 }}>
-          This check-in does not exist. <Link to="/coach/check-ins">Back to inbox</Link>
-        </div>
-      </div>
-    );
-  }
-
+  // ✅ Wrap EVERYTHING in the same centered container
   return (
-    <div>
-      <PageHeader
-        breadcrumb="Coach / Check-Ins / Details"
-        title="Check-In Details"
-        subtitle={`${clientName || checkIn.clientId} • ${checkIn.date}`}
-      />
-
-      <div className="checkInDetailsGrid">
-        <div className="checkInLeft">
-          <div className="card detailsCard">
-            <div className="detailsTitle">Client Submission</div>
-
-            <div className="detailsRow">
-              <div className="detailsLabel">Client</div>
-              <div className="detailsValue">{clientName || checkIn.clientId}</div>
-            </div>
-
-            <div className="detailsRow">
-              <div className="detailsLabel">Date</div>
-              <div className="detailsValue">{checkIn.date}</div>
-            </div>
-
-            <div className="detailsRow">
-              <div className="detailsLabel">Weight</div>
-              <div className="detailsValue">
-                {checkIn.weight ?? "-"} {weightUnit}
-              </div>
-            </div>
-
-            <div style={{ marginTop: 14, fontWeight: 900 }}>
-              Body Measurements ({measureUnit})
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 10,
-              }}
-            >
-              <div className="detailsRow">
-                <div className="detailsLabel">Left Arm</div>
-                <div className="detailsValue">{body.leftArm || "-"}</div>
-              </div>
-              <div className="detailsRow">
-                <div className="detailsLabel">Right Arm</div>
-                <div className="detailsValue">{body.rightArm || "-"}</div>
-              </div>
-
-              <div className="detailsRow">
-                <div className="detailsLabel">Chest</div>
-                <div className="detailsValue">{body.chest || "-"}</div>
-              </div>
-              <div className="detailsRow">
-                <div className="detailsLabel">Waist</div>
-                <div className="detailsValue">{body.waist || "-"}</div>
-              </div>
-
-              <div className="detailsRow">
-                <div className="detailsLabel">Hips</div>
-                <div className="detailsValue">{body.hips || "-"}</div>
-              </div>
-              <div className="detailsRow">
-                <div className="detailsLabel">Left Thigh</div>
-                <div className="detailsValue">{body.leftThigh || "-"}</div>
-              </div>
-
-              <div className="detailsRow">
-                <div className="detailsLabel">Right Thigh</div>
-                <div className="detailsValue">{body.rightThigh || "-"}</div>
-              </div>
-              <div className="detailsRow">
-                <div className="detailsLabel">Left Calf</div>
-                <div className="detailsValue">{body.leftCalf || "-"}</div>
-              </div>
-
-              <div className="detailsRow">
-                <div className="detailsLabel">Right Calf</div>
-                <div className="detailsValue">{body.rightCalf || "-"}</div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 16, fontWeight: 900 }}>Progress Photos</div>
-            <div
-              style={{
-                marginTop: 10,
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 10,
-              }}
-            >
-              <PhotoPreview label="Front" photo={photos.front} />
-              <PhotoPreview label="Side" photo={photos.side} />
-              <PhotoPreview label="Back" photo={photos.back} />
-            </div>
-
-            <div className="detailsNotes" style={{ marginTop: 14 }}>
-              <div className="detailsLabel">Compliance Notes</div>
-              <div className="detailsNotesBox">{checkIn.notes || "-"}</div>
-            </div>
-          </div>
-
-          <div className="backRow">
-            <Link className="backLink" to="/coach/check-ins">
-              ← Back to inbox
-            </Link>
-          </div>
-        </div>
-
-        <div className="checkInRight">
-          <CoachNotesBox
-            value={draftNotes}
-            onChange={setDraftNotes}
-            onSave={saveNotes}
-            onMarkReviewed={markReviewed}
-            status={checkIn.status}
-            disabled={saving}
+    <div className="checkInDetailsPage">
+      {loading ? (
+        <>
+          <PageHeader
+            breadcrumb="Coach / Check-Ins / Details"
+            title="Check-In Details"
+            subtitle="Loading..."
           />
-        </div>
-      </div>
+          <div className="card" style={{ padding: 16 }}>
+            Loading check-in...
+          </div>
+        </>
+      ) : !checkIn ? (
+        <>
+          <PageHeader
+            breadcrumb="Coach / Check-Ins / Details"
+            title="Check-In Details"
+            subtitle={`Not found: ${checkInId}`}
+          />
+          <div className="card" style={{ padding: 16 }}>
+            This check-in does not exist.{" "}
+            <Link to="/coach/check-ins">Back to inbox</Link>
+          </div>
+        </>
+      ) : (
+        <>
+          <PageHeader
+            breadcrumb="Coach / Check-Ins / Details"
+            title="Check-In Details"
+            subtitle={`${clientName || checkIn.clientId} • ${checkIn.date}`}
+          />
+
+          <div className="checkInDetailsGrid">
+            <div className="checkInLeft">
+              <div className="card detailsCard">
+                <div className="detailsTitle">Client Submission</div>
+
+                <div className="detailsRow">
+                  <div className="detailsLabel">Client</div>
+                  <div className="detailsValue">
+                    {clientName || checkIn.clientId}
+                  </div>
+                </div>
+
+                <div className="detailsRow">
+                  <div className="detailsLabel">Date</div>
+                  <div className="detailsValue">{checkIn.date}</div>
+                </div>
+
+                <div className="detailsRow">
+                  <div className="detailsLabel">Weight</div>
+                  <div className="detailsValue">
+                    {checkIn.weight ?? "-"} {weightUnit}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 14, fontWeight: 900 }}>
+                  Body Measurements ({measureUnit})
+                </div>
+
+                <div className="measurementsGrid">
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Left Arm</div>
+                    <div className="detailsValue">{body.leftArm || "-"}</div>
+                  </div>
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Right Arm</div>
+                    <div className="detailsValue">{body.rightArm || "-"}</div>
+                  </div>
+
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Chest</div>
+                    <div className="detailsValue">{body.chest || "-"}</div>
+                  </div>
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Waist</div>
+                    <div className="detailsValue">{body.waist || "-"}</div>
+                  </div>
+
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Hips</div>
+                    <div className="detailsValue">{body.hips || "-"}</div>
+                  </div>
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Left Thigh</div>
+                    <div className="detailsValue">{body.leftThigh || "-"}</div>
+                  </div>
+
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Right Thigh</div>
+                    <div className="detailsValue">{body.rightThigh || "-"}</div>
+                  </div>
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Left Calf</div>
+                    <div className="detailsValue">{body.leftCalf || "-"}</div>
+                  </div>
+
+                  <div className="detailsRow">
+                    <div className="detailsLabel">Right Calf</div>
+                    <div className="detailsValue">{body.rightCalf || "-"}</div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 16, fontWeight: 900 }}>
+                  Progress Photos
+                </div>
+
+                <div className="photosGridDetails">
+                  <PhotoPreview label="Front" photo={photos.front} />
+                  <PhotoPreview label="Side" photo={photos.side} />
+                  <PhotoPreview label="Back" photo={photos.back} />
+                </div>
+
+                <div className="detailsNotes">
+                  <div className="detailsLabel">Compliance Notes</div>
+                  <div className="detailsNotesBox">{checkIn.notes || "-"}</div>
+                </div>
+              </div>
+
+              <div className="backRow">
+                <Link className="backLink" to="/coach/check-ins">
+                  ← Back to inbox
+                </Link>
+              </div>
+            </div>
+
+            <div className="checkInRight">
+              <CoachNotesBox
+                value={draftNotes}
+                onChange={setDraftNotes}
+                onSave={saveNotes}
+                onMarkReviewed={markReviewed}
+                status={checkIn.status}
+                disabled={saving}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,17 +1,14 @@
 import "./TextInput.css";
 
-function TextInput({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-}) {
+function TextInput({ label, name, type = "text", value, onChange, placeholder }) {
   return (
     <div className="formField">
-      <label className="formLabel">{label}</label>
+      <label className="formLabel" htmlFor={name}>
+        {label}
+      </label>
+
       <input
+        id={name}
         className="formInput"
         type={type}
         name={name}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
+
 import FormCard from "../../../components/form/FormCard/FormCard";
 import TextInput from "../../../components/form/TextInput/TextInput";
 import UnitToggle from "../../../components/checkin/UnitToggle/UnitToggle";
@@ -7,9 +8,9 @@ import MeasurementsGrid from "../../../components/checkin/MeasurementsGrid/Measu
 import PhotoUploadBox from "../../../components/checkin/PhotoUploadBox/PhotoUploadBox";
 
 import { createCheckIn } from "../../../api/checkins.api";
-import "./WeeklyCheckIn.css";
+import { getClientId } from "../../../auth/session";
 
-import { getClientId } from "../../../auth/session"; // ✅ adjust path if needed
+import "./WeeklyCheckIn.css";
 
 function isoToday() {
   return new Date().toISOString().slice(0, 10);
@@ -42,27 +43,24 @@ async function normalizePhotosForStorage(photos) {
   const front = await fileToDataUrl(photos?.front || null);
   const side = await fileToDataUrl(photos?.side || null);
   const back = await fileToDataUrl(photos?.back || null);
-
   return { front, side, back };
 }
 
 function WeeklyCheckIn() {
-  // ✅ clientId comes from session (no hardcode)
   const CURRENT_CLIENT_ID = getClientId();
 
-  // ✅ safety fallback
+  // safety fallback
   if (!CURRENT_CLIENT_ID) {
     alert("Not logged in as client");
     return null;
   }
 
-  // default values (course simple)
   const [weightUnit, setWeightUnit] = useState("kg");
   const [measureUnit, setMeasureUnit] = useState("cm");
 
   const [weight, setWeight] = useState("");
 
-  // ✅ FIXED: body keys now match what CoachCheckInDetails displays
+  // body keys must match CoachCheckInDetails
   const [body, setBody] = useState({
     leftArm: "",
     rightArm: "",
@@ -77,14 +75,13 @@ function WeeklyCheckIn() {
 
   const [photos, setPhotos] = useState({ front: null, side: null, back: null });
   const [complianceNotes, setComplianceNotes] = useState("");
-
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (submitting) return;
 
-    if (!weight) {
+    if (!String(weight || "").trim()) {
       alert("Please enter your weight.");
       return;
     }
@@ -92,7 +89,6 @@ function WeeklyCheckIn() {
     setSubmitting(true);
 
     try {
-      // convert photos to JSON-safe structure
       const photosStored = await normalizePhotosForStorage(photos);
 
       const newCheckIn = {
@@ -100,21 +96,18 @@ function WeeklyCheckIn() {
         clientId: CURRENT_CLIENT_ID,
         date: isoToday(),
 
-        // basic summary fields (for lists/tables)
+        // list/table summary fields (course simple)
         weight: Number(weight),
         waist: body?.waist ? Number(body.waist) : null,
         sleepHours: null,
         energy: "Average",
         adherence: null,
 
-        // client message
         notes: complianceNotes || "",
 
-        // coach fields (filled later)
         coachNotes: "",
         status: "submitted",
 
-        // full submission payload
         weightUnit,
         measureUnit,
         body: body || {},
@@ -125,7 +118,7 @@ function WeeklyCheckIn() {
 
       alert("Weekly check-in submitted.");
 
-      // ✅ reset (must match the same fixed object)
+      // reset
       setWeight("");
       setBody({
         leftArm: "",
@@ -236,11 +229,7 @@ function WeeklyCheckIn() {
             </FormCard>
 
             <div className="submitRow">
-              <button
-                className="weeklySubmitBtn"
-                type="submit"
-                disabled={submitting}
-              >
+              <button className="weeklySubmitBtn" type="submit" disabled={submitting}>
                 {submitting ? "Submitting..." : "Submit Check-In"}
               </button>
             </div>

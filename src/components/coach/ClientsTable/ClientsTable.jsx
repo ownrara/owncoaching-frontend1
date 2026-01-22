@@ -1,18 +1,22 @@
 import { Link } from "react-router-dom";
 import "./ClientsTable.css";
 
-function ClientsTable({ rows }) {
+function ClientsTable({ rows, title = "Clients" }) {
   if (!rows || rows.length === 0) {
     return (
-      <div className="card" style={{ padding: 16 }}>
+      <div className="card clientsEmpty">
         No clients found.
       </div>
     );
   }
 
   return (
-    <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-      <div className="clientsTableHeader">Clients ({rows.length})</div>
+    <div className="card clientsCard">
+      <div className="clientsHeader">
+        <div className="clientsHeaderTitle">
+          {title} <span className="clientsCount">({rows.length})</span>
+        </div>
+      </div>
 
       <div className="clientsTableWrap">
         <table className="clientsTable">
@@ -20,16 +24,16 @@ function ClientsTable({ rows }) {
             <tr>
               <th>Name</th>
               <th>Client ID</th>
-              <th style={{ textAlign: "right" }}></th>
+              <th></th>
             </tr>
           </thead>
 
           <tbody>
             {rows.map((c) => (
               <tr key={c.id}>
-                <td>{c.name || "-"}</td>
-                <td>{c.id}</td>
-                <td style={{ textAlign: "right" }}>
+                <td className="clientsName">{c.name || "-"}</td>
+                <td className="clientsId">{c.id}</td>
+                <td className="clientsActions">
                   <Link className="viewBtn" to={`/coach/clients/${c.id}`}>
                     View
                   </Link>

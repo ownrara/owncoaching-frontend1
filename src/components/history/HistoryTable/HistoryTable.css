@@ -1,33 +1,38 @@
+.historyTableHeader {
+  padding: 12px 14px;
+  font-weight: 900;
+  border-bottom: 1px solid var(--border);
+}
+
 .historyTableWrap {
   width: 100%;
   overflow-x: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
 }
 
 .historyTable {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
 
 .historyTable th,
 .historyTable td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #eef0f5;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
   text-align: left;
-  font-size: 14px;
   vertical-align: top;
+  white-space: nowrap;
 }
 
-.historyTable th {
-  background: #f7f9fc;
-  font-weight: 700;
+.historyTable thead th {
+  background: var(--surface);
+  font-weight: 900;
 }
 
 .emptyCell {
-  padding: 18px 12px;
+  padding: 18px 14px;
   color: var(--muted);
+  white-space: normal;
 }
 
 .notesCell {

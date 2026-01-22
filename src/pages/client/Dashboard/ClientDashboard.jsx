@@ -9,7 +9,7 @@ import "./ClientDashboard.css";
 import { fetchClientById } from "../../../api/clients.api";
 import { fetchTrainingPlan } from "../../../api/training.api";
 import { fetchCheckIns } from "../../../api/checkins.api";
-import { getClientId } from "../../../auth/session"; // ✅ session-based
+import { getClientId } from "../../../auth/session";
 
 function safeText(v) {
   return String(v ?? "").trim();
@@ -17,8 +17,7 @@ function safeText(v) {
 
 function ClientDashboard() {
   const navigate = useNavigate();
-
-  const CLIENT_ID = getClientId(); // ✅ NO hardcoded ID
+  const CLIENT_ID = getClientId();
 
   const [client, setClient] = useState(null);
   const [trainingPlan, setTrainingPlan] = useState(null);
@@ -38,9 +37,7 @@ function ClientDashboard() {
         const [clientData, trainingData, checkInsData] = await Promise.all([
           fetchClientById(CLIENT_ID).catch(() => null),
           fetchTrainingPlan(CLIENT_ID).catch(() => null),
-          fetchCheckIns(`?clientId=${encodeURIComponent(CLIENT_ID)}`).catch(
-            () => []
-          ),
+          fetchCheckIns(`?clientId=${encodeURIComponent(CLIENT_ID)}`).catch(() => []),
         ]);
 
         if (!isMounted) return;
@@ -105,7 +102,6 @@ function ClientDashboard() {
   const overview = useMemo(() => {
     const fullName = safeText(client?.name) || `Client ${CLIENT_ID}`;
     const goal = safeText(client?.goal) || "—";
-
     const totalCheckIns = checkIns.length;
 
     const durationWeeks =
@@ -116,9 +112,7 @@ function ClientDashboard() {
     const currentWeek = trainingPlan?.currentWeek ?? null;
 
     const latestWeight =
-      recentCheckIn?.weight != null
-        ? Number(recentCheckIn.weight)
-        : null;
+      recentCheckIn?.weight != null ? Number(recentCheckIn.weight) : null;
 
     return [
       {
@@ -165,17 +159,11 @@ function ClientDashboard() {
       stats: [
         {
           label: "Weight",
-          value:
-            recentCheckIn.weight != null
-              ? `${recentCheckIn.weight} kg`
-              : "-",
+          value: recentCheckIn.weight != null ? `${recentCheckIn.weight} kg` : "-",
         },
         {
           label: "Waist",
-          value:
-            recentCheckIn.waist ??
-            recentCheckIn.body?.waist ??
-            "-",
+          value: recentCheckIn.waist ?? recentCheckIn.body?.waist ?? "-",
         },
         {
           label: "Status",
@@ -197,38 +185,34 @@ function ClientDashboard() {
         subtitle="Overview of your fitness journey"
       />
 
-      <div className="section">
+      <div className="section dashboardSection">
         <div className="dashboardGrid3">
           {overview.map((item) => (
-            <div key={item.id} className="card">
-              <StatCard
-                label={item.label}
-                value={item.value}
-                subtext={item.subtext}
-              />
+            <div key={item.id} className="card statAccent">
+              <StatCard label={item.label} value={item.value} subtext={item.subtext} />
             </div>
           ))}
         </div>
 
         {loading && (
-          <div className="card" style={{ padding: 12, marginTop: 12 }}>
+          <div className="card dashboardNotice" style={{ padding: 12, marginTop: 12 }}>
             Loading...
           </div>
         )}
       </div>
 
-      <div className="section">
+      <div className="section dashboardSection">
         <h3 className="sectionTitle">Quick Actions</h3>
         <div className="dashboardGrid2">
           {quickActions.map((action) => (
-            <div key={action.id} className="card">
+            <div key={action.id} className="card cardHover">
               <ActionCard {...action} />
             </div>
           ))}
         </div>
       </div>
 
-      <div className="section">
+      <div className="section dashboardSection">
         <SectionCard
           title="Recent Check-In & Coach Update"
           rightText="View Progress History"

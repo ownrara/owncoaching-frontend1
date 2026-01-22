@@ -1,31 +1,23 @@
-/* Makes the page align like the old design (not centered tiny) */
-.nutritionPage {
-  width: 100%;
-}
+.nutritionPage {}
 
-/* Main 2-column layout like old screenshot */
 .nutritionGrid {
   display: grid;
-  grid-template-columns: 1fr 420px;
-  gap: 18px;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 14px;
   align-items: start;
-  margin-top: 10px;
 }
 
-/* Left column should be wide */
 .nutritionLeft {
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
-/* Right column fixed width card */
 .nutritionRight {
-  min-width: 0;
+  position: sticky;
+  top: 18px;
 }
 
-/* Top controls card */
 .nutritionTopCard {
   padding: 14px;
 }
@@ -34,26 +26,34 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  align-items: end;
 }
 
 .nutritionControlLabel {
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12px;
   color: var(--muted);
+  font-weight: 800;
   margin-bottom: 6px;
 }
 
+.nutritionControl select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}
+
+.nutritionControl select:focus {
+  border-color: rgba(46, 196, 182, 0.5);
+  box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.18);
+}
+
 .nutritionInfoStrip {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
-/* Coach Notes spacing */
-.nutritionSection {
-  margin-top: 0;
-}
-
-/* Meals card */
 .nutritionMealsCard {
   padding: 0;
   overflow: hidden;
@@ -70,17 +70,21 @@
 }
 
 .nutritionEmpty {
-  padding: 10px 0;
-  font-size: 14px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
   color: var(--muted);
+  background: #fff;
 }
 
-/* Responsive (stack columns) */
-@media (max-width: 1100px) {
+/* responsive */
+@media (max-width: 980px) {
   .nutritionGrid {
     grid-template-columns: 1fr;
   }
-
+  .nutritionRight {
+    position: static;
+  }
   .nutritionControlsRow {
     grid-template-columns: 1fr;
   }

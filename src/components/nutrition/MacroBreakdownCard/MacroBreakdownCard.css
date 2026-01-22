@@ -3,7 +3,7 @@
 }
 
 .macroCardTitle {
-  font-weight: 800;
+  font-weight: 900;
   margin-bottom: 10px;
 }
 
@@ -49,13 +49,13 @@
 
 .macroRowLabel {
   font-size: 13px;
-  font-weight: 700;
-  color: #2b2b2b;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .macroRowValue {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .macroBarTrack {
@@ -68,7 +68,7 @@
 
 .macroBarFill {
   height: 100%;
-  background: #1e63ff;
+  background: var(--primary);
   border-radius: 999px;
 }
 
@@ -86,16 +86,16 @@
 .macroHistoryBtn {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #1e63ff;
-  background: #ffffff;
-  color: #1e63ff;
-  font-weight: 800;
+  border-radius: 10px;
+  border: 1px solid rgba(46, 196, 182, 0.45);
+  background: rgba(46, 196, 182, 0.10);
+  color: var(--text);
+  font-weight: 900;
   cursor: pointer;
 }
 
 .macroHistoryBtn:hover {
-  opacity: 0.95;
+  filter: brightness(0.98);
 }
 
 .macroTotalsMini {

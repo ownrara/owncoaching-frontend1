@@ -24,21 +24,20 @@ function CoachSidebar() {
         <NavLink to="/coach/dashboard" className={linkClass}>
           Dashboard
         </NavLink>
+
         <NavLink to="/coach/clients" className={linkClass}>
           Clients
         </NavLink>
+
         <NavLink to="/coach/check-ins" className={linkClass}>
           Check-Ins
         </NavLink>
       </nav>
 
-      {/* Footer area + logout */}
+      <div className="coachSidebarSpacer" />
+
       <div className="coachSidebarFooter">
-        <button
-          type="button"
-          className="coachLogoutBtn"
-          onClick={handleLogout}
-        >
+        <button type="button" className="coachLogoutBtn" onClick={handleLogout}>
           Logout
         </button>
 

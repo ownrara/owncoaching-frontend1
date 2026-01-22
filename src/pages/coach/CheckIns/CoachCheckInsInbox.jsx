@@ -18,10 +18,9 @@ function normalizeStatus(status) {
 
   if (s === "pending") return "Pending";
   if (s === "submitted") return "Pending";
-
   if (s === "reviewed") return "Reviewed";
 
-  // fallback: capitalize first letter
+  // fallback
   if (!s) return "Pending";
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -46,12 +45,12 @@ function CoachCheckInsInbox() {
         if (!isMounted) return;
 
         // Normalize check-ins status for UI
-        const normalizedCheckIns = (Array.isArray(checkInsData) ? checkInsData : []).map(
-          (c) => ({
-            ...c,
-            status: normalizeStatus(c.status),
-          })
-        );
+        const normalizedCheckIns = (
+          Array.isArray(checkInsData) ? checkInsData : []
+        ).map((c) => ({
+          ...c,
+          status: normalizeStatus(c.status),
+        }));
 
         setCheckIns(normalizedCheckIns);
         setClients(Array.isArray(clientsData) ? clientsData : []);
@@ -99,8 +98,12 @@ function CoachCheckInsInbox() {
   }, [status, checkIns, clientNameById]);
 
   const summary = useMemo(() => {
-    const pending = checkIns.filter((c) => normalizeStatus(c.status) === "Pending").length;
-    const reviewed = checkIns.filter((c) => normalizeStatus(c.status) === "Reviewed").length;
+    const pending = checkIns.filter(
+      (c) => normalizeStatus(c.status) === "Pending"
+    ).length;
+    const reviewed = checkIns.filter(
+      (c) => normalizeStatus(c.status) === "Reviewed"
+    ).length;
     return { pending, reviewed, total: checkIns.length };
   }, [checkIns]);
 
@@ -112,45 +115,50 @@ function CoachCheckInsInbox() {
         subtitle="Review client submissions and add coaching feedback"
       />
 
-      <div className="checkInsInboxTop">
-        <div className="checkInsStats">
-          <div className="checkInsStat">
-            <div className="checkInsStatLabel">Total</div>
-            <div className="checkInsStatValue">{summary.total}</div>
+      {/* ✅ NEW: centered container so stats row and table align */}
+      <div className="checkInsPage">
+        <div className="checkInsInboxTop">
+          <div className="checkInsStats">
+            <div className="checkInsStat">
+              <div className="checkInsStatLabel">Total</div>
+              <div className="checkInsStatValue">{summary.total}</div>
+            </div>
+
+            <div className="checkInsStat">
+              <div className="checkInsStatLabel">Pending</div>
+              <div className="checkInsStatValue">{summary.pending}</div>
+            </div>
+
+            <div className="checkInsStat">
+              <div className="checkInsStatLabel">Reviewed</div>
+              <div className="checkInsStatValue">{summary.reviewed}</div>
+            </div>
           </div>
-          <div className="checkInsStat">
-            <div className="checkInsStatLabel">Pending</div>
-            <div className="checkInsStatValue">{summary.pending}</div>
-          </div>
-          <div className="checkInsStat">
-            <div className="checkInsStatLabel">Reviewed</div>
-            <div className="checkInsStatValue">{summary.reviewed}</div>
+
+          <div className="checkInsFilter">
+            <label className="checkInsFilterLabel">Status</label>
+            <select
+              className="checkInsSelect"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              disabled={loading}
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <div className="checkInsFilter">
-          <label className="checkInsFilterLabel">Status</label>
-          <select
-            className="checkInsSelect"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            disabled={loading}
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
+        <div className="section">
+          <CheckInsTable
+            rows={rows}
+            title={status === "All" ? "All Check-Ins" : `${status} Check-Ins`}
+            emptyText={loading ? "Loading..." : "No check-ins match this filter."}
+          />
         </div>
-      </div>
-
-      <div className="section">
-        <CheckInsTable
-          rows={rows}
-          title={status === "All" ? "All Check-Ins" : `${status} Check-Ins`}
-          emptyText={loading ? "Loading..." : "No check-ins match this filter."}
-        />
       </div>
     </div>
   );

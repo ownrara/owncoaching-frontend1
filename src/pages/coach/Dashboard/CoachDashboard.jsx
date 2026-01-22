@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import CheckInsTable from "../../../components/coach/CheckInsTable/CheckInsTable";
-
+import "./CoachDashboard.css";
 import { fetchCheckIns } from "../../../api/checkins.api";
 import { fetchClients } from "../../../api/clients.api";
 

@@ -143,7 +143,7 @@ function TrainingPlan() {
           </div>
 
           {/* Week selector */}
-          <div className="section card">
+          <div className="section">
             <WeekSelector
               weeks={plan.weeks}
               selectedWeekNumber={selectedWeek}

@@ -67,3 +67,14 @@
 .btnSecondary {
   background: var(--surface);
 }
+
+/* Status badges */
+.badgeReviewed {
+  border-color: rgba(34, 197, 94, 0.25);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.badgePending {
+  border-color: rgba(46, 196, 182, 0.35);
+  background: rgba(46, 196, 182, 0.12);
+}

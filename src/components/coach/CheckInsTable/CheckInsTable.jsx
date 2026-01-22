@@ -16,14 +16,8 @@ function CheckInsTable({
 
   return (
     <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-      <div
-        style={{
-          padding: "12px 14px",
-          fontWeight: 900,
-          borderBottom: "1px solid var(--border)",
-        }}
-      >
-        {title} ({rows.length})
+      <div className="checkInsHeader">
+        {title} <span className="checkInsHeaderCount">({rows.length})</span>
       </div>
 
       <div className="checkInsTableWrap">
@@ -45,7 +39,11 @@ function CheckInsTable({
                 <td>
                   <span
                     className={
-                      r.status === "Pending" ? "badge badgePending" : "badge"
+                      r.status === "Pending"
+                        ? "badge badgePending"
+                        : r.status === "Reviewed"
+                        ? "badge badgeReviewed"
+                        : "badge"
                     }
                   >
                     {r.status}

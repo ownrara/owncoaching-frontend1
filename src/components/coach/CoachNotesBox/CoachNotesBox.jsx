@@ -1,6 +1,13 @@
 import "./CoachNotesBox.css";
 
-function CoachNotesBox({ value, onChange, onSave, onMarkReviewed, status }) {
+function CoachNotesBox({
+  value,
+  onChange,
+  onSave,
+  onMarkReviewed,
+  status,
+  disabled,
+}) {
   const isReviewed = status === "Reviewed";
 
   return (
@@ -13,7 +20,7 @@ function CoachNotesBox({ value, onChange, onSave, onMarkReviewed, status }) {
           </div>
         </div>
 
-        <span className={isReviewed ? "badge" : "badge badgePending"}>
+        <span className={isReviewed ? "badge badgeReviewed" : "badge badgePending"}>
           {status}
         </span>
       </div>
@@ -24,10 +31,16 @@ function CoachNotesBox({ value, onChange, onSave, onMarkReviewed, status }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder="Write feedback and next steps..."
         rows={7}
+        disabled={disabled}
       />
 
       <div className="coachNotesActions">
-        <button type="button" className="btnSecondary" onClick={onSave}>
+        <button
+          type="button"
+          className="btnSecondary"
+          onClick={onSave}
+          disabled={disabled}
+        >
           Save Notes
         </button>
 
@@ -35,7 +48,7 @@ function CoachNotesBox({ value, onChange, onSave, onMarkReviewed, status }) {
           type="button"
           className="btnPrimary"
           onClick={onMarkReviewed}
-          disabled={isReviewed}
+          disabled={disabled || isReviewed}
         >
           Mark Reviewed
         </button>

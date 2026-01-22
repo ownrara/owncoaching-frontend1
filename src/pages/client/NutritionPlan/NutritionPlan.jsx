@@ -9,7 +9,7 @@ import MacroBreakdownCard from "../../../components/nutrition/MacroBreakdownCard
 import MealAccordion from "../../../components/nutrition/MealAccordion/MealAccordion";
 
 import { fetchNutritionPlan } from "../../../api/nutrition.api";
-import { getClientId } from "../../../auth/session"; // adjust path if needed
+import { getClientId } from "../../../auth/session";
 
 import "./NutritionPlan.css";
 import "../../../components/nutrition/Nutrition.css";
@@ -42,7 +42,6 @@ function NutritionPlan() {
     let isMounted = true;
 
     async function load() {
-      // ✅ safety fallback
       if (!CURRENT_CLIENT_ID) {
         alert("Not logged in as client!");
         if (isMounted) setLoading(false);

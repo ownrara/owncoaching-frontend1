@@ -14,7 +14,10 @@ function ClientSidebar() {
 
   return (
     <aside className="sidebar">
-      <div className="sidebarBrand">OwnCoaching</div>
+      <div className="sidebarBrand">
+        <div className="sidebarLogo">OwnCoaching</div>
+        <div className="sidebarSub">Client Portal</div>
+      </div>
 
       <nav className="sidebarNav">
         <NavLink to="/client/dashboard" className={linkClass}>
@@ -42,7 +45,8 @@ function ClientSidebar() {
         </NavLink>
       </nav>
 
-      {/* Bottom logout */}
+      <div className="sidebarSpacer" />
+
       <div className="sidebarFooter">
         <button type="button" className="logoutBtn" onClick={handleLogout}>
           Logout

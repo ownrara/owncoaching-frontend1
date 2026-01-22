@@ -41,17 +41,18 @@ function Login() {
     }
   }
 
-  return (
-    <div className="section">
+return (
+  <div className="authPage">
+    <div className="authWrap">
       <PageHeader
         breadcrumb="Auth / Login"
         title="Login"
         subtitle="Access your dashboard"
       />
 
-      <div className="card" style={{ padding: 16, maxWidth: 520 }}>
+      <div className="card authCard">
         <form onSubmit={handleSubmit}>
-          <label style={{ display: "block", marginBottom: 6 }}>Email</label>
+          <label className="fieldLabel">Email</label>
           <input
             className="editInput"
             value={email}
@@ -59,9 +60,9 @@ function Login() {
             placeholder="email@test.com"
           />
 
-          <div style={{ height: 12 }} />
+          <div className="vSpace" />
 
-          <label style={{ display: "block", marginBottom: 6 }}>Password</label>
+          <label className="fieldLabel">Password</label>
           <input
             className="editInput"
             type="password"
@@ -70,19 +71,20 @@ function Login() {
             placeholder="••••"
           />
 
-          <div style={{ height: 16 }} />
+          <div className="vSpaceLg" />
 
-          <button className="primaryBtn" type="submit" disabled={loading}>
+          <button className="primaryBtn btnBlock" type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          <div style={{ marginTop: 12 }}>
+          <div className="authFooter">
             No account? <Link to="/signup">Create one</Link>
           </div>
         </form>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default Login;

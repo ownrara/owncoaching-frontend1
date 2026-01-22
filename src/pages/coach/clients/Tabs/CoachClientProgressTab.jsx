@@ -8,6 +8,8 @@ import HistoryTable from "../../../../components/history/HistoryTable/HistoryTab
 import { fetchCheckIns } from "../../../../api/checkins.api";
 import { formatNumber } from "../../../../utils/formatters";
 
+import "./CoachClientProgressTab.css";
+
 // Reuse the SAME layout CSS as client Progress History
 import "../../../client/ProgressHistory/ProgressHistory.css";
 
@@ -24,7 +26,6 @@ function CoachClientProgressTab() {
   const [checkIns, setCheckIns] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load from backend (this client's history)
   useEffect(() => {
     let isMounted = true;
 
@@ -52,7 +53,6 @@ function CoachClientProgressTab() {
     };
   }, [clientId]);
 
-  // newest first
   const clientRows = useMemo(() => {
     return [...checkIns].sort((a, b) => (a.date < b.date ? 1 : -1));
   }, [checkIns]);
@@ -83,15 +83,17 @@ function CoachClientProgressTab() {
   }
 
   return (
-    <div className="section">
+    <div className="coachProgressTab">
       <div className="progressLayout">
         <div className="progressLeft">
           <div className="section">
-            <HistoryFilters
-              filters={filters}
-              onChangeFilters={setFilters}
-              onReset={resetFilters}
-            />
+            <FormCard title="Filters">
+              <HistoryFilters
+                filters={filters}
+                onChangeFilters={setFilters}
+                onReset={resetFilters}
+              />
+            </FormCard>
           </div>
 
           <div className="section">
@@ -99,7 +101,9 @@ function CoachClientProgressTab() {
               <div className="summaryRow">
                 <div className="summaryItem">
                   <div className="summaryLabel">Check-ins</div>
-                  <div className="summaryValue">{loading ? "-" : summary.count}</div>
+                  <div className="summaryValue">
+                    {loading ? "-" : summary.count}
+                  </div>
                 </div>
 
                 <div className="summaryItem">

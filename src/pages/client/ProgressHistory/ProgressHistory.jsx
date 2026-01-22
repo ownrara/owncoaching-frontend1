@@ -7,26 +7,20 @@ import { formatNumber } from "../../../utils/formatters";
 import "./ProgressHistory.css";
 
 import { fetchCheckIns } from "../../../api/checkins.api";
-import { getClientId } from "../../../auth/session"; // adjust path if needed
+import { getClientId } from "../../../auth/session";
 
-const DEFAULT_FILTERS = {
-  fromDate: "",
-  toDate: "",
-};
+const DEFAULT_FILTERS = { fromDate: "", toDate: "" };
 
 function ProgressHistory() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-
   const [checkIns, setCheckIns] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const CURRENT_CLIENT_ID = getClientId();
 
-  // Load check-ins from backend (client history)
   useEffect(() => {
     let isMounted = true;
 
-    // safety fallback
     if (!CURRENT_CLIENT_ID) {
       alert("Not logged in as client!");
       setLoading(false);
@@ -37,12 +31,12 @@ function ProgressHistory() {
 
     async function load() {
       try {
+        setLoading(true);
         const list = await fetchCheckIns(
           `?clientId=${encodeURIComponent(CURRENT_CLIENT_ID)}`
         );
 
         if (!isMounted) return;
-
         setCheckIns(Array.isArray(list) ? list : []);
       } catch (err) {
         console.error(err);
@@ -61,7 +55,6 @@ function ProgressHistory() {
 
   const filtered = useMemo(() => {
     return checkIns.filter((c) => {
-      // Date range (ISO string compares safely: YYYY-MM-DD)
       if (filters.fromDate && c.date < filters.fromDate) return false;
       if (filters.toDate && c.date > filters.toDate) return false;
       return true;
@@ -72,10 +65,7 @@ function ProgressHistory() {
     const count = filtered.length;
     if (count === 0) return { count: 0, avgWeight: null };
 
-    const totalWeight = filtered.reduce(
-      (sum, c) => sum + Number(c.weight || 0),
-      0
-    );
+    const totalWeight = filtered.reduce((sum, c) => sum + Number(c.weight || 0), 0);
     const avgWeight = totalWeight / count;
 
     return { count, avgWeight: Math.round(avgWeight * 10) / 10 };
@@ -95,43 +85,39 @@ function ProgressHistory() {
 
       <div className="section">
         <div className="progressLayout">
+          {/* LEFT */}
           <div className="progressLeft">
-            <div className="section">
+            <FormCard title="Filters">
               <HistoryFilters
                 filters={filters}
                 onChangeFilters={setFilters}
                 onReset={resetFilters}
               />
-            </div>
+            </FormCard>
 
-            <div className="section">
-              <FormCard title="Summary (Filtered)">
-                <div className="summaryRow">
-                  <div className="summaryItem">
-                    <div className="summaryLabel">Check-ins</div>
-                    <div className="summaryValue">
-                      {loading ? "-" : summary.count}
-                    </div>
-                  </div>
+            <FormCard title="Summary (Filtered)">
+              <div className="summaryRow">
+                <div className="summaryItem">
+                  <div className="summaryLabel">Check-ins</div>
+                  <div className="summaryValue">{loading ? "—" : summary.count}</div>
+                </div>
 
-                  <div className="summaryItem">
-                    <div className="summaryLabel">Avg Weight</div>
-                    <div className="summaryValue">
-                      {loading ? "-" : formatNumber(summary.avgWeight, " kg")}
-                    </div>
+                <div className="summaryItem">
+                  <div className="summaryLabel">Avg Weight</div>
+                  <div className="summaryValue">
+                    {loading ? "—" : formatNumber(summary.avgWeight, " kg")}
                   </div>
                 </div>
-              </FormCard>
-            </div>
+              </div>
+            </FormCard>
           </div>
 
+          {/* RIGHT */}
           <div className="progressRight">
-            <div className="section">
-              <HistoryTable
-                rows={filtered}
-                emptyText={loading ? "Loading..." : "No check-ins found."}
-              />
-            </div>
+            <HistoryTable
+              rows={filtered}
+              emptyText={loading ? "Loading..." : "No check-ins match the current filters."}
+            />
           </div>
         </div>
       </div>

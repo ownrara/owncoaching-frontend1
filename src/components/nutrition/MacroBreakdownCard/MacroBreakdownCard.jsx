@@ -52,7 +52,6 @@ function MacroBreakdownCard({ caloriesGoal = 0, macroPercents, totals }) {
           View Nutrition History
         </button>
 
-        {/* Debug (optional): remove later */}
         <div className="macroTotalsMini">
           Planned totals today: {safeTotals.calories} kcal • P {safeTotals.protein}g • C{" "}
           {safeTotals.carbs}g • F {safeTotals.fat}g

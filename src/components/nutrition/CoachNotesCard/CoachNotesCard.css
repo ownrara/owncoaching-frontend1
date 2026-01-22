@@ -3,7 +3,7 @@
 }
 
 .nutritionLegacyCardTitle {
-  font-weight: 800;
+  font-weight: 900;
   font-size: 15px;
   margin-bottom: 8px;
 }
@@ -11,5 +11,5 @@
 .nutritionLegacyNotes {
   font-size: 13px;
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.6;
 }

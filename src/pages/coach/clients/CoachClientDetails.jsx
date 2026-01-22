@@ -2,6 +2,7 @@ import { Outlet, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import Tabs from "../../../components/common/Tabs/Tabs";
+import "./CoachClientDetails.css";
 
 import { fetchClientById } from "../../../api/clients.api";
 
@@ -41,7 +42,7 @@ function CoachClientDetails() {
   ];
 
   return (
-    <div>
+    <div className="coachClientDetailsPage">
       <PageHeader
         breadcrumb="Coach / Clients / Details"
         title="Client Details"
@@ -57,7 +58,9 @@ function CoachClientDetails() {
       <Tabs items={tabs} />
 
       {/* Child tab content renders here */}
-      <Outlet />
+      <div className="coachClientDetailsBody">
+        <Outlet />
+      </div>
     </div>
   );
 }
