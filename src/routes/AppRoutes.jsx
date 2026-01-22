@@ -19,20 +19,20 @@ import ClientProfile from "../pages/client/ClientProfile/ClientProfile";
 /* ========== COACH ========== */
 import CoachLayout from "../layouts/CoachLayout/CoachLayout";
 import CoachDashboard from "../pages/coach/Dashboard/CoachDashboard";
-import CoachClients from "../pages/coach/Clients/CoachClients";
+import CoachClients from "../pages/coach/clients/CoachClients";
 
-import CoachClientDetails from "../pages/coach/Clients/CoachClientDetails";
+import CoachClientDetails from "../pages/coach/clients/CoachClientDetails";
 import CoachClientOverviewTab from "../pages/coach/clients/tabs/CoachClientOverviewTab";
-import CoachClientProgressTab from "../pages/coach/Clients/tabs/CoachClientProgressTab";
-import CoachClientCheckInsTab from "../pages/coach/Clients/tabs/CoachClientCheckInsTab";
-import CoachClientTrainingTab from "../pages/coach/Clients/tabs/CoachClientTrainingTab";
-import CoachClientNutritionTab from "../pages/coach/Clients/tabs/CoachClientNutritionTab";
+import CoachClientProgressTab from "../pages/coach/clients/tabs/CoachClientProgressTab";
+import CoachClientCheckInsTab from "../pages/coach/clients/tabs/CoachClientCheckInsTab";
+import CoachClientTrainingTab from "../pages/coach/clients/tabs/CoachClientTrainingTab";
+import CoachClientNutritionTab from "../pages/coach/clients/tabs/CoachClientNutritionTab";
 
 import CoachCheckInsInbox from "../pages/coach/CheckIns/CoachCheckInsInbox";
 import CoachCheckInDetails from "../pages/coach/CheckIns/CoachCheckInDetails";
 
-import CoachClientTrainingEdit from "../pages/coach/Clients/edit/CoachClientTrainingEdit";
-import CoachClientNutritionEdit from "../pages/coach/Clients/edit/CoachClientNutritionEdit";
+import CoachClientTrainingEdit from "../pages/coach/clients/edit/CoachClientTrainingEdit";
+import CoachClientNutritionEdit from "../pages/coach/clients/edit/CoachClientNutritionEdit";
 
 /**
  * OPTIONAL: /logout route (no Logout.jsx file needed)
