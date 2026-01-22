@@ -27,3 +27,20 @@
   border-color: rgba(58, 91, 255, 0.35);
   color: var(--text);
 }
+.sidebarFooter {
+  margin-top: auto;
+  padding: 12px;
+}
+
+.logoutBtn {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  background: #f6f6f6;
+}

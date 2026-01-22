@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+
+/* ========== AUTH ========== */
+import RequireRole from "../auth/RequireRole";
+import Login from "../pages/auth/Login";
+import Signup from "../pages/auth/Signup";
+import { clearSession } from "../auth/session";
 
 /* ========== CLIENT ========== */
 import ClientLayout from "../layouts/ClientLayout/ClientLayout";
@@ -27,15 +34,45 @@ import CoachCheckInDetails from "../pages/coach/CheckIns/CoachCheckInDetails";
 import CoachClientTrainingEdit from "../pages/coach/Clients/edit/CoachClientTrainingEdit";
 import CoachClientNutritionEdit from "../pages/coach/Clients/edit/CoachClientNutritionEdit";
 
+/**
+ * OPTIONAL: /logout route (no Logout.jsx file needed)
+ * Clears session then redirects to /login
+ */
+function LogoutRoute() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    clearSession();
+    navigate("/login", { replace: true });
+  }, [navigate]);
+
+  return null; // no UI needed
+}
+
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         {/* ROOT */}
-        <Route path="/" element={<Navigate to="/client/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* ================= CLIENT ROUTES ================= */}
-        <Route path="/client" element={<ClientLayout />}>
+        {/* AUTH ROUTES (public) */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* OPTIONAL LOGOUT ROUTE */}
+        <Route path="/logout" element={<LogoutRoute />} />
+
+        {/* ================= CLIENT ROUTES (protected) ================= */}
+        <Route
+          path="/client/*"
+          element={
+            <RequireRole role="client">
+              <ClientLayout />
+            </RequireRole>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="training-plan" element={<TrainingPlan />} />
           <Route path="nutrition-plan" element={<NutritionPlan />} />
@@ -44,23 +81,30 @@ function AppRoutes() {
           <Route path="profile" element={<ClientProfile />} />
         </Route>
 
-        {/* ================= COACH ROUTES ================= */}
-        <Route path="/coach" element={<CoachLayout />}>
+        {/* ================= COACH ROUTES (protected) ================= */}
+        <Route
+          path="/coach/*"
+          element={
+            <RequireRole role="coach">
+              <CoachLayout />
+            </RequireRole>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<CoachDashboard />} />
           <Route path="clients" element={<CoachClients />} />
 
-          {/* Edit Training (keep it OUTSIDE tabs nesting to avoid path confusion) */}
+          {/* Edit routes (outside tabs) */}
           <Route
             path="clients/:clientId/training/edit"
             element={<CoachClientTrainingEdit />}
           />
-          {/* Edit Nutrition (keep it OUTSIDE tabs nesting to avoid path confusion) */}
           <Route
             path="clients/:clientId/nutrition/edit"
             element={<CoachClientNutritionEdit />}
           />
 
-          {/* CLIENT DETAILS (nested tabs) */}
+          {/* Client details + tabs */}
           <Route path="clients/:clientId" element={<CoachClientDetails />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<CoachClientOverviewTab />} />
@@ -70,13 +114,13 @@ function AppRoutes() {
             <Route path="nutrition" element={<CoachClientNutritionTab />} />
           </Route>
 
-          {/* CHECK-INS */}
+          {/* Check-ins */}
           <Route path="check-ins" element={<CoachCheckInsInbox />} />
           <Route path="check-ins/:checkInId" element={<CoachCheckInDetails />} />
         </Route>
 
         {/* FALLBACK */}
-        <Route path="*" element={<Navigate to="/client/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

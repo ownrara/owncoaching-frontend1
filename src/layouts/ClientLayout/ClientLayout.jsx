@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import ClientSidebar from "../../components/navigation/ClientSidebar/ClientSidebar";
-import Topbar from "../../components/navigation/Topbar/Topbar";
 import "./ClientLayout.css";
 
 function ClientLayout() {
@@ -9,9 +8,8 @@ function ClientLayout() {
       <ClientSidebar />
 
       <div className="clientMain">
-        <Topbar />
-         <main className="clientContent page">
-        <Outlet />
+        <main className="clientContent page">
+          <Outlet />
         </main>
       </div>
     </div>

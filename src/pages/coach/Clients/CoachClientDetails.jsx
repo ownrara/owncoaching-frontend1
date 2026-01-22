@@ -1,28 +1,36 @@
 import { Outlet, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import Tabs from "../../../components/common/Tabs/Tabs";
-import mockClients from "../../../data/mockClients";
+
+import { fetchClientById } from "../../../api/clients.api";
 
 function CoachClientDetails() {
   const { clientId } = useParams();
 
-  const client = mockClients.find((c) => String(c.id) === String(clientId));
+  const [client, setClient] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // If clientId is invalid (mock-only project), keep it safe
-  if (!client) {
-    return (
-      <div>
-        <PageHeader
-          breadcrumb="Coach / Clients / Details"
-          title="Client Details"
-          subtitle={`Not found: ${clientId}`}
-        />
-        <div className="card" style={{ padding: 16 }}>
-          This client does not exist in mock data.
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    let isMounted = true;
+
+    async function load() {
+      try {
+        const data = await fetchClientById(clientId);
+        if (isMounted) setClient(data || null);
+      } catch (err) {
+        console.warn("Client not found, falling back to ID only");
+        if (isMounted) setClient(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [clientId]);
 
   const tabs = [
     { label: "Overview", to: "overview" },
@@ -37,7 +45,13 @@ function CoachClientDetails() {
       <PageHeader
         breadcrumb="Coach / Clients / Details"
         title="Client Details"
-        subtitle={`${client.name} (ID: ${client.id})`}
+        subtitle={
+          loading
+            ? "Loading client..."
+            : client
+            ? `${client.name} (ID: ${client.id})`
+            : `Client ID: ${clientId}`
+        }
       />
 
       <Tabs items={tabs} />

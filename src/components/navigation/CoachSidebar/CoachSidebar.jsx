@@ -1,9 +1,17 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { clearSession } from "../../../auth/session";
 import "./CoachSidebar.css";
 
 function CoachSidebar() {
+  const navigate = useNavigate();
+
   const linkClass = ({ isActive }) =>
     isActive ? "coachNavLink isActive" : "coachNavLink";
+
+  function handleLogout() {
+    clearSession();
+    navigate("/login", { replace: true });
+  }
 
   return (
     <aside className="coachSidebar">
@@ -24,7 +32,18 @@ function CoachSidebar() {
         </NavLink>
       </nav>
 
-      <div className="coachSidebarFooter">© OwnCoaching</div>
+      {/* Footer area + logout */}
+      <div className="coachSidebarFooter">
+        <button
+          type="button"
+          className="coachLogoutBtn"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+
+        <div className="coachCopyright">© OwnCoaching</div>
+      </div>
     </aside>
   );
 }

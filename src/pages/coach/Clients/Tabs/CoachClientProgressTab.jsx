@@ -5,7 +5,7 @@ import FormCard from "../../../../components/form/FormCard/FormCard";
 import HistoryFilters from "../../../../components/history/HistoryFilters/HistoryFilters";
 import HistoryTable from "../../../../components/history/HistoryTable/HistoryTable";
 
-import { getCheckIns, onCheckInsChange } from "../../../../data/checkInsStore";
+import { fetchCheckIns } from "../../../../api/checkins.api";
 import { formatNumber } from "../../../../utils/formatters";
 
 // Reuse the SAME layout CSS as client Progress History
@@ -20,20 +20,42 @@ function CoachClientProgressTab() {
   const { clientId } = useParams();
 
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [allCheckIns, setAllCheckIns] = useState(() => getCheckIns());
 
+  const [checkIns, setCheckIns] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load from backend (this client's history)
   useEffect(() => {
-    const off = onCheckInsChange(() => {
-      setAllCheckIns(getCheckIns());
-    });
-    return off;
-  }, []);
+    let isMounted = true;
 
+    async function load() {
+      try {
+        const list = await fetchCheckIns(
+          `?clientId=${encodeURIComponent(clientId)}`
+        );
+
+        if (!isMounted) return;
+
+        setCheckIns(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load client progress");
+        if (isMounted) setCheckIns([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [clientId]);
+
+  // newest first
   const clientRows = useMemo(() => {
-    return [...allCheckIns]
-      .filter((c) => c.clientId === clientId)
-      .sort((a, b) => (a.date < b.date ? 1 : -1));
-  }, [allCheckIns, clientId]);
+    return [...checkIns].sort((a, b) => (a.date < b.date ? 1 : -1));
+  }, [checkIns]);
 
   const filtered = useMemo(() => {
     return clientRows.filter((c) => {
@@ -77,13 +99,13 @@ function CoachClientProgressTab() {
               <div className="summaryRow">
                 <div className="summaryItem">
                   <div className="summaryLabel">Check-ins</div>
-                  <div className="summaryValue">{summary.count}</div>
+                  <div className="summaryValue">{loading ? "-" : summary.count}</div>
                 </div>
 
                 <div className="summaryItem">
                   <div className="summaryLabel">Avg Weight</div>
                   <div className="summaryValue">
-                    {formatNumber(summary.avgWeight, " kg")}
+                    {loading ? "-" : formatNumber(summary.avgWeight, " kg")}
                   </div>
                 </div>
               </div>
@@ -93,7 +115,10 @@ function CoachClientProgressTab() {
 
         <div className="progressRight">
           <div className="section">
-            <HistoryTable rows={filtered} />
+            <HistoryTable
+              rows={filtered}
+              emptyText={loading ? "Loading..." : "No check-ins found."}
+            />
           </div>
         </div>
       </div>

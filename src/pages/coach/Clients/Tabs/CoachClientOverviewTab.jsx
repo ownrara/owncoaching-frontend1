@@ -1,24 +1,72 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import mockClients from "../../../../data/mockClients";
-import { getCheckIns } from "../../../../data/checkInsStore";
 import "./CoachClientOverviewTab.css";
+
+import { fetchClientById } from "../../../../api/clients.api";
+import { fetchCheckIns } from "../../../../api/checkins.api";
+
+function normalizeStatus(status) {
+  const s = String(status || "").trim().toLowerCase();
+  if (s === "pending") return "Pending";
+  if (s === "submitted") return "Pending";
+  if (s === "reviewed") return "Reviewed";
+  if (!s) return "Pending";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 function CoachClientOverviewTab() {
   const { clientId } = useParams();
 
-  const client = useMemo(() => {
-    return mockClients.find((c) => c.id === clientId) || null;
+  const [client, setClient] = useState(null);
+  const [checkIns, setCheckIns] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load client + check-ins from backend
+  useEffect(() => {
+    let isMounted = true;
+
+    async function load() {
+      try {
+        setLoading(true);
+
+        const [clientData, checkInsData] = await Promise.all([
+          fetchClientById(clientId).catch(() => null),
+          fetchCheckIns(`?clientId=${encodeURIComponent(clientId)}`).catch(() => []),
+        ]);
+
+        if (!isMounted) return;
+
+        setClient(clientData || null);
+
+        const normalized = (Array.isArray(checkInsData) ? checkInsData : []).map((c) => ({
+          ...c,
+          status: normalizeStatus(c.status),
+        }));
+
+        setCheckIns(normalized);
+      } catch (err) {
+        console.error(err);
+        if (isMounted) {
+          setClient(null);
+          setCheckIns([]);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      isMounted = false;
+    };
   }, [clientId]);
 
   const stats = useMemo(() => {
-    const all = getCheckIns();
-    const mine = all.filter((c) => c.clientId === clientId);
+    const mine = checkIns;
 
-    const pending = mine.filter((c) => c.status === "Pending").length;
-    const reviewed = mine.filter((c) => c.status === "Reviewed").length;
+    const pending = mine.filter((c) => normalizeStatus(c.status) === "Pending").length;
+    const reviewed = mine.filter((c) => normalizeStatus(c.status) === "Reviewed").length;
 
-    // newest first (ISO date works lexicographically)
     const sorted = [...mine].sort((a, b) => (a.date < b.date ? 1 : -1));
     const lastDate = sorted[0]?.date || "-";
 
@@ -28,7 +76,15 @@ function CoachClientOverviewTab() {
       reviewed,
       lastDate,
     };
-  }, [clientId]);
+  }, [checkIns]);
+
+  if (loading) {
+    return (
+      <div className="card" style={{ padding: 16 }}>
+        Loading...
+      </div>
+    );
+  }
 
   if (!client) {
     return (
@@ -46,12 +102,12 @@ function CoachClientOverviewTab() {
         <div className="overviewGrid">
           <div className="overviewItem">
             <div className="overviewLabel">Client Name</div>
-            <div className="overviewValue">{client.name}</div>
+            <div className="overviewValue">{client.name || clientId}</div>
           </div>
 
           <div className="overviewItem">
             <div className="overviewLabel">Client ID</div>
-            <div className="overviewValue">{client.id}</div>
+            <div className="overviewValue">{client.id || clientId}</div>
           </div>
 
           <div className="overviewItem">
@@ -106,9 +162,7 @@ function CoachClientOverviewTab() {
             </Link>
           </div>
 
-          <div className="overviewHint">
-            Tip: Review pending check-ins first, then adjust plans.
-          </div>
+          <div className="overviewHint">Tip: Review pending check-ins first, then adjust plans.</div>
         </div>
       </div>
     </div>

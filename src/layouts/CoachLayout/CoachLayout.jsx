@@ -6,6 +6,7 @@ function CoachLayout() {
   return (
     <div className="coachShell">
       <CoachSidebar />
+
       <main className="coachMain">
         <div className="coachContent">
           <Outlet />

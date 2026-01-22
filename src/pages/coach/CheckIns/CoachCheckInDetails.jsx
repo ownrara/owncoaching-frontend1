@@ -2,15 +2,32 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import CoachNotesBox from "../../../components/coach/CoachNotesBox/CoachNotesBox";
-import mockClients from "../../../data/mockClients";
-import { getCheckIns, onCheckInsChange, saveCheckIns } from "../../../data/checkInsStore";
 import "./CoachCheckInDetails.css";
+
+import { fetchCheckInById, reviewCheckIn } from "../../../api/checkins.api";
+import { fetchClientById } from "../../../api/clients.api";
 
 function formatUnitLabel(u) {
   if (u === "in") return "in";
   if (u === "cm") return "cm";
   if (u === "lbs") return "lbs";
   return "kg";
+}
+
+function normalizeStatus(status) {
+  const s = String(status || "").trim().toLowerCase();
+  if (s === "pending") return "Pending";
+  if (s === "submitted") return "Pending";
+  if (s === "reviewed") return "Reviewed";
+  if (!s) return "Pending";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function statusToBackend(uiStatus) {
+  const s = String(uiStatus || "").trim().toLowerCase();
+  if (s === "reviewed") return "reviewed";
+  // anything else becomes submitted
+  return "submitted";
 }
 
 function PhotoPreview({ label, photo }) {
@@ -33,7 +50,11 @@ function PhotoPreview({ label, photo }) {
         <img
           src={src}
           alt={name}
-          style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)" }}
+          style={{
+            width: "100%",
+            borderRadius: 10,
+            border: "1px solid var(--border)",
+          }}
         />
       ) : (
         <div style={{ color: "var(--muted)" }}>{name}</div>
@@ -45,51 +66,119 @@ function PhotoPreview({ label, photo }) {
 function CoachCheckInDetails() {
   const { checkInId } = useParams();
 
-  const [checkIns, setCheckIns] = useState(() => getCheckIns());
-
-  useEffect(() => {
-    const off = onCheckInsChange(() => setCheckIns(getCheckIns()));
-    return off;
-  }, []);
-
-  const checkIn = useMemo(() => {
-    return checkIns.find((c) => c.id === checkInId) || null;
-  }, [checkIns, checkInId]);
-
-  const client = useMemo(() => {
-    if (!checkIn) return null;
-    return mockClients.find((x) => x.id === checkIn.clientId) || null;
-  }, [checkIn]);
+  const [checkIn, setCheckIn] = useState(null);
+  const [clientName, setClientName] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [draftNotes, setDraftNotes] = useState("");
+  const [saving, setSaving] = useState(false);
 
+  // Load check-in from backend
   useEffect(() => {
-    setDraftNotes(checkIn?.coachNotes || "");
-  }, [checkInId, checkIn?.coachNotes]);
+    let isMounted = true;
 
-  function persist(next) {
-    setCheckIns(next);
-    saveCheckIns(next);
+    async function load() {
+      try {
+        const data = await fetchCheckInById(checkInId);
+
+        if (!isMounted) return;
+
+        const normalized = {
+          ...data,
+          status: normalizeStatus(data.status),
+        };
+
+        setCheckIn(normalized);
+        setDraftNotes(normalized.coachNotes || "");
+
+        // fetch client name (optional but recommended)
+        const clientId = normalized.clientId;
+        if (clientId) {
+          const c = await fetchClientById(clientId).catch(() => null);
+          if (isMounted) setClientName(c?.name || clientId);
+        } else {
+          setClientName("");
+        }
+      } catch (err) {
+        console.error(err);
+        if (isMounted) setCheckIn(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [checkInId]);
+
+  // derived values (safe)
+  const weightUnit = useMemo(() => formatUnitLabel(checkIn?.weightUnit), [checkIn]);
+  const measureUnit = useMemo(() => formatUnitLabel(checkIn?.measureUnit), [checkIn]);
+  const body = checkIn?.body || {};
+  const photos = checkIn?.photos || {};
+
+  async function saveNotes() {
+    if (!checkIn) return;
+    if (saving) return;
+
+    setSaving(true);
+    try {
+      // ✅ safer: never accidentally downgrade "Reviewed"
+      const nextStatus =
+        checkIn.status === "Reviewed" ? "reviewed" : "submitted";
+
+      await reviewCheckIn(checkIn.id, {
+        status: nextStatus,
+        coachNotes: draftNotes,
+      });
+
+      // update local UI state (no refetch needed)
+      setCheckIn((prev) => (prev ? { ...prev, coachNotes: draftNotes } : prev));
+      alert("Notes saved");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to save notes");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function saveNotes() {
+  async function markReviewed() {
     if (!checkIn) return;
+    if (saving) return;
 
-    const next = checkIns.map((c) =>
-      c.id === checkIn.id ? { ...c, coachNotes: draftNotes } : c
-    );
-    persist(next);
+    setSaving(true);
+    try {
+      await reviewCheckIn(checkIn.id, {
+        status: "reviewed",
+        coachNotes: draftNotes,
+      });
+
+      setCheckIn((prev) =>
+        prev ? { ...prev, status: "Reviewed", coachNotes: draftNotes } : prev
+      );
+      alert("Marked as reviewed");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to mark reviewed");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function markReviewed() {
-    if (!checkIn) return;
-
-    const next = checkIns.map((c) =>
-      c.id === checkIn.id
-        ? { ...c, status: "Reviewed", coachNotes: draftNotes }
-        : c
+  if (loading) {
+    return (
+      <div>
+        <PageHeader
+          breadcrumb="Coach / Check-Ins / Details"
+          title="Check-In Details"
+          subtitle="Loading..."
+        />
+        <div className="card" style={{ padding: 16 }}>Loading check-in...</div>
+      </div>
     );
-    persist(next);
   }
 
   if (!checkIn) {
@@ -100,37 +189,29 @@ function CoachCheckInDetails() {
           title="Check-In Details"
           subtitle={`Not found: ${checkInId}`}
         />
-
         <div className="card" style={{ padding: 16 }}>
-          This check-in does not exist.{" "}
-          <Link to="/coach/check-ins">Back to inbox</Link>
+          This check-in does not exist. <Link to="/coach/check-ins">Back to inbox</Link>
         </div>
       </div>
     );
   }
-
-  const weightUnit = formatUnitLabel(checkIn.weightUnit);
-  const measureUnit = formatUnitLabel(checkIn.measureUnit);
-  const body = checkIn.body || {};
-  const photos = checkIn.photos || {};
 
   return (
     <div>
       <PageHeader
         breadcrumb="Coach / Check-Ins / Details"
         title="Check-In Details"
-        subtitle={`${client?.name || checkIn.clientId} • ${checkIn.date}`}
+        subtitle={`${clientName || checkIn.clientId} • ${checkIn.date}`}
       />
 
       <div className="checkInDetailsGrid">
         <div className="checkInLeft">
-          {/* CLIENT SUBMISSION — match the client form sections */}
           <div className="card detailsCard">
             <div className="detailsTitle">Client Submission</div>
 
             <div className="detailsRow">
               <div className="detailsLabel">Client</div>
-              <div className="detailsValue">{client?.name || checkIn.clientId}</div>
+              <div className="detailsValue">{clientName || checkIn.clientId}</div>
             </div>
 
             <div className="detailsRow">
@@ -138,7 +219,6 @@ function CoachCheckInDetails() {
               <div className="detailsValue">{checkIn.date}</div>
             </div>
 
-            {/* 1) Weight */}
             <div className="detailsRow">
               <div className="detailsLabel">Weight</div>
               <div className="detailsValue">
@@ -146,9 +226,18 @@ function CoachCheckInDetails() {
               </div>
             </div>
 
-            {/* 2) Body Measurements */}
-            <div style={{ marginTop: 14, fontWeight: 900 }}>Body Measurements ({measureUnit})</div>
-            <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div style={{ marginTop: 14, fontWeight: 900 }}>
+              Body Measurements ({measureUnit})
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 10,
+              }}
+            >
               <div className="detailsRow">
                 <div className="detailsLabel">Left Arm</div>
                 <div className="detailsValue">{body.leftArm || "-"}</div>
@@ -191,15 +280,20 @@ function CoachCheckInDetails() {
               </div>
             </div>
 
-            {/* 3) Progress Photos */}
             <div style={{ marginTop: 16, fontWeight: 900 }}>Progress Photos</div>
-            <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+            <div
+              style={{
+                marginTop: 10,
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 10,
+              }}
+            >
               <PhotoPreview label="Front" photo={photos.front} />
               <PhotoPreview label="Side" photo={photos.side} />
               <PhotoPreview label="Back" photo={photos.back} />
             </div>
 
-            {/* 4) Compliance Notes */}
             <div className="detailsNotes" style={{ marginTop: 14 }}>
               <div className="detailsLabel">Compliance Notes</div>
               <div className="detailsNotesBox">{checkIn.notes || "-"}</div>
@@ -220,6 +314,7 @@ function CoachCheckInDetails() {
             onSave={saveNotes}
             onMarkReviewed={markReviewed}
             status={checkIn.status}
+            disabled={saving}
           />
         </div>
       </div>
